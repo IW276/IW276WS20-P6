@@ -7,13 +7,13 @@ Short introduction to project assigment.
   Link to Demo Video
 </p>
 
-> This work was done by Autor 1, Autor2, Autor 3 during the IW276 Autonome Systeme Labor at the Karlsruhe University of Applied Sciences (Hochschule Karlruhe - Technik und Wirtschaft) in WS 2020 / 2021. 
+> This work was done by Christian Braun, Fabian Wenzel and Bernardo Abreu Figueiredo during the IW276 Autonome Systeme Labor at the Karlsruhe University of Applied Sciences (Hochschule Karlruhe - Technik und Wirtschaft) in WS 2020 / 2021. 
 
 ## Table of Contents
 
 * [Requirements](#requirements)
 * [Prerequisites](#prerequisites)
-* [Pre-trained model](#pre-trained-model)
+* [Pre-trained models](#pre-trained-models)
 * [Running](#running)
 * [Acknowledgments](#acknowledgments)
 
