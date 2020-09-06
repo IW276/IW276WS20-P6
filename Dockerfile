@@ -5,12 +5,9 @@ RUN nvcc --version
 
 # https://github.com/dusty-nv/jetson-containers/issues/5#issuecomment-632829664
 COPY nvidia-l4t-apt-source.list /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+COPY jetson-ota-public.asc /etc/apt/trusted.gpg.d/jetson-ota-public.asc
 
 RUN apt-get update
-
-# https://github.com/dusty-nv/jetson-containers/issues/5#issuecomment-673458718
-RUN apt-key adv --fetch-key https://repo.download.nvidia.com/jetson/jetson-ota-public.asc
-RUN mv jetson-ota-public.asc /etc/apt/trusted.gpg.d/jetson-ota-public.asc
 
 RUN apt-get install -y libopencv-python && apt-get install -y --no-install-recommends \
           python3-pip \
@@ -18,9 +15,11 @@ RUN apt-get install -y libopencv-python && apt-get install -y --no-install-recom
           build-essential \
           zlib1g-dev \
           zip \
-          libxinerama-dev \ 
+          libxinerama-dev \
           libxcursor-dev \
-          libjpeg8-dev 
+          libjpeg8-dev
+
+RUN apt-get update && apt-get -y install p7zip-full
 RUN rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install setuptools Cython wheel
@@ -32,7 +31,25 @@ RUN apt-get update && apt-get -y install cmake protobuf-compiler
 # install face_recognition (https://github.com/ageitgey/face_recognition)
 RUN pip3 install face_recognition
 
+# install yaml
+RUN pip3 install pyyaml
+
 # install torch2trt (https://github.com/NVIDIA-AI-IOT/torch2trt#setup)
 RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt
 WORKDIR /torch2trt
 RUN python3 setup.py install
+
+# clone old project and run pipeline
+WORKDIR /
+RUN git clone https://github.com/IW276/IW276WS20-P6.git
+
+RUN mkdir /IW276WS20-P6/models
+
+WORKDIR /IW276WS20-P6/pretrained-models
+RUN 7z x resnet50.224.trt.pth.7z.001 -o../models
+
+WORKDIR /IW276WS20-P6/models
+RUN ls
+
+WORKDIR /IW276WS20-P6/src
+RUN python3 pipeline_main.py 0
