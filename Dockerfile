@@ -43,13 +43,13 @@ RUN python3 setup.py install
 WORKDIR /
 RUN git clone https://github.com/IW276/IW276WS20-P6.git
 
-RUN mkdir /IW276SS20-P6/models
+RUN mkdir /IW276WS20-P6/models
 
-WORKDIR /IW276SS20-P6/pretrained-models
+WORKDIR /IW276WS20-P6/pretrained-models
 RUN 7z x resnet50.224.trt.pth.7z.001 -o../models
 
-WORKDIR /IW276SS20-P6/models
+WORKDIR /IW276WS20-P6/models
 RUN ls
 
-WORKDIR /IW276SS20-P6/src
+WORKDIR /IW276WS20-P6/src
 RUN python3 pipeline_main.py 0
