@@ -41,36 +41,25 @@ RUN python3 setup.py install
 
 # clone old project and run pipeline
 WORKDIR /
+
 RUN git clone https://github.com/IW276/IW276WS20-P6.git
 
-RUN mkdir /IW276WS20-P6/models
-
-WORKDIR /IW276WS20-P6/pretrained-models
-RUN 7z x resnet50.224.pth.7z -o../models
-
-WORKDIR /IW276WS20-P6/models
-RUN ls
+WORKDIR /IW276WS20-P6
+RUN mv resources/pyrealsense2/ src/
 
 WORKDIR /IW276WS20-P6/src
-RUN python3 convert2trt.py resnet50 ../models/resnet50.224.pth ../models/resnet50.224.trt.pth
-RUN python3 pipeline_main.py video.mp4
+RUN python3 -c "import pyrealsense2"
+RUN python3 realsenseVideo.py
 
-# resnet50 nehmen
-# zur not resnet18 nehmen
+# RUN mkdir /IW276WS20-P6/models
 
-# warum funktioniert es nicht
-# funktioniert pytorch
-# trainingsmodell probieren
+# WORKDIR /IW276WS20-P6/pretrained-models
+# RUN 7z x resnet50.224.pth.7z -o../models
 
-# nochmal in tensort convertieren
-# dann die pipeline zum laufen bringen
+# WORKDIR /IW276WS20-P6/models
+# RUN ls
 
-# preporcessing anhand der tiefendaten => background foreground 
-# feedback loop machen um zu probieren ob die tiefendaten überhaupt klappt
-# an welchem punkt verwenden wir die tiefenschätzung vor oder nach der face_recognition
+# WORKDIR /IW276WS20-P6/src
+# RUN python3 convert2trt.py resnet50 ../models/resnet50.224.pth ../models/resnet50.224.trt.pth
+# RUN python3 pipeline_main.py video.mp4
 
-# was wir machen ist eigentlich nur preprocessing
-# opencv numpy optimierung des preprocessing
-# wie kann ich den preprocessing teil beschleuingen (multi threading...)
-# ein weg die gesichts detektion zu beschleunigen -> bessere ersetzen, schnittstellen anpassen
-# tensor rt bringt beschleunigung
