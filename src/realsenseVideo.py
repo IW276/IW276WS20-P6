@@ -1,6 +1,9 @@
 import pyrealsense2 as rs
 import cv2
 import numpy as np
+import pyximport; pyximport.install()
+import substitute
+
 
 pipeline = rs.pipeline()
 config = rs.config()
@@ -22,11 +25,15 @@ try:
 
         coverage = depth_image.copy()
 
-        for y in range(480):
-            for x in range(640):
-                dist = depth_frame.get_distance(x, y)
-                if dist > 1:
-                    coverage[y][x] = 9000
+        # for y in range(480):
+        #     for x in range(640):
+        #         dist = depth_frame.get_distance(x, y)
+        #         if dist > 1:
+        #             coverage[y][x] = 9000
+
+        coverage = substitute.substitute_distant_pixels(coverage, depth_frame)
+
+        coverage = np.asanyarray(coverage)
 
         depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
         coverage_colormap = cv2.applyColorMap(cv2.convertScaleAbs(coverage, alpha=0.03), cv2.COLORMAP_JET)
