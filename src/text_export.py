@@ -1,6 +1,5 @@
 import os.path
 
-
 class TextExport:
 
     number = 1
@@ -14,9 +13,9 @@ class TextExport:
 
     def append(self, frameNumber, px, py, expression):
         self.file.write("  Number: {}\n".format(self.number))
-        self.file.write("    Frame: {} \n".format(frameNumber))
-        self.file.write("    Position: {} {} \n".format(str(px), str(py)))
-        self.file.write("    Expression: {} \n".format(expression))
+        self.file.write("  Frame: {} \n".format(frameNumber))
+        self.file.write("  Position: {} {} \n".format(str(px), str(py)))
+        self.file.write("  Expression: {} \n".format(expression))
         self.number += 1
 
     def close(self):

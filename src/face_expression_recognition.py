@@ -12,6 +12,7 @@ from torch2trt import torch2trt
 from torch2trt import TRTModule
 
 
+
 class TRTModel:
 
     dictionary = {
@@ -26,10 +27,10 @@ class TRTModel:
     }
 
     def __init__(self, size=224):
-        self.model_trt = TRTModule()
-        PATH = '../models/resnet50.224.trt.pth'
-        self.model_trt.load_state_dict(torch.load(PATH))
-        self.model_trt.eval().cuda()
+        self.model = models.wide_resnet50_2()
+        model_path = '../models/resnet50.224.pth'
+        self.model.load_state_dict(torch.load(model_path))
+        self.model.eval().cuda()
 
         self.label_map = dict((v, k) for k, v in self.dictionary.items())
         self.size = size
@@ -49,7 +50,7 @@ class TRTModel:
         tensor_image = self.image_loader(resized_image)
         tensor_image = tensor_image.cuda().contiguous()
         with torch.no_grad():
-            outputs = self.model_trt(tensor_image)
+            outputs = self.model(tensor_image)
             _, predicted = torch.max(outputs, 1)
             idx = predicted.item()
             face_expression = self.label_map[idx]
