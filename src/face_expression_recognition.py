@@ -27,7 +27,7 @@ class TRTModel:
     }
 
     def __init__(self, size=224):
-        self.model = models.wide_resnet50_2()
+        self.model = models.resnet50()
         model_path = '../models/resnet50.224.pth'
         self.model.load_state_dict(torch.load(model_path))
         self.model.eval().cuda()
