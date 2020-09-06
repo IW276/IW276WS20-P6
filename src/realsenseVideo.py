@@ -1,6 +1,7 @@
 import pyrealsense2 as rs
 import cv2
 import numpy as np
+import time
 import pyximport; pyximport.install()
 import substitute
 
@@ -12,8 +13,17 @@ config.enable_stream(rs.stream.color, 640, 480, rs.format.bgr8, 30)
 
 pipeline.start(config)
 
+start_time_current = time.time()
+start_time_old = time.time()
+
+print(start_time_old)
 try:
     while True:
+        time_at_start = time.time()
+
+        start_time_old = start_time_current
+        start_time_current = time.time()
+
         frames = pipeline.wait_for_frames()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
@@ -37,6 +47,13 @@ try:
 
         depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
         coverage_colormap = cv2.applyColorMap(cv2.convertScaleAbs(coverage, alpha=0.03), cv2.COLORMAP_JET)
+
+        fps = 1 / (0.000001 + start_time_current - start_time_old)
+        stats = "Output FPS: {}".format(int(fps))
+
+        cv2.rectangle(color_image, (0, 0), (300, 25), (255, 0, 0), cv2.FILLED)
+        font = cv2.FONT_HERSHEY_DUPLEX
+        cv2.putText(color_image, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
 
         images = np.hstack((color_image, depth_colormap, coverage_colormap))
 
