@@ -42,14 +42,29 @@ RUN python3 setup.py install
 # clone old project and run pipeline
 WORKDIR /
 
-RUN git clone https://github.com/IW276/IW276WS20-P6.git
+RUN apt-get update && apt-get -y install xorg-dev libglu1-mesa-dev libusb-1.0-0-dev
 
-WORKDIR /IW276WS20-P6
-RUN mv resources/pyrealsense2/ src/
+RUN git clone https://github.com/IntelRealSense/librealsense
+RUN mkdir librealsense/build
+WORKDIR /librealsense/build
+RUN cmake ../ -DBUILD_PYTHON_BINDINGS=bool:true
+RUN make -j4 VERBOSE=1 
+RUN make install
 
-WORKDIR /IW276WS20-P6/src
-RUN python3 -c "import pyrealsense2"
-RUN python3 realsenseVideo.py
+RUN mv /usr/local/lib/python2.7/pyrealsense2 /usr/local/lib/python3.6/dist-packages
+RUN mv /librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
+
+RUN apt-get update && apt-get install -qqy x11-apps xauth
+
+# RUN python3 -c "import pyrealsense2"
+# RUN git clone https://github.com/IW276/IW276WS20-P6.git
+
+# WORKDIR /IW276WS20-P6
+# RUN mv resources/pyrealsense2/ src/
+
+# WORKDIR /IW276WS20-P6/src
+# RUN python3 -c "import pyrealsense2"
+# RUN python3 realsenseVideo.py
 
 # RUN mkdir /IW276WS20-P6/models
 
