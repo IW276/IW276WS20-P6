@@ -40,7 +40,7 @@ def convert():
     print("{}".format(model_trt(data)))
     print("{}".format(resnet18_model(data)))
 
-    torch.save(model_trt.state_dict(), TARGET)
+    # torch.save(model_trt.state_dict(), TARGET)
 
 
 class ResNet(nn.Module):
