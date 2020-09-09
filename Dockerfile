@@ -55,6 +55,7 @@ RUN mv /usr/local/lib/python2.7/pyrealsense2 /usr/local/lib/python3.6/dist-packa
 RUN mv /librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
 
 RUN apt-get update && apt-get install -qqy x11-apps xauth
+ENTRYPOINT /bin/bash
 
 # RUN python3 -c "import pyrealsense2"
 # RUN git clone https://github.com/IW276/IW276WS20-P6.git

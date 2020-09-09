@@ -2,7 +2,7 @@
 # --device /dev/video2 --privileged --env DISPLAY=$DISPLAY -v /home/p6/.Xauthority:/root/.Xauthority -v /tmp/.X11-unix:/tmp/.X11-unix 
 # --net=host --entrypoint bash wenzeldock/asl-p6-pyrealsense2:2.0.0
 
-version: "3.8"
+version: "3.3"
 services: 
     asl-p6-recognition:
         image: wenzeldock/asl-p6-pyrealsense2:2.0.0
@@ -18,3 +18,4 @@ services:
             - "/dev/video0:/dev/video0"
             - "/dev/video1:/dev/video1"
             - "/dev/video2:/dev/video2"
+        stdin_open: true
