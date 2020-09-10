@@ -27,10 +27,10 @@ class TRTModel:
     }
 
     def __init__(self, size=224):
-        self.model = models.resnet50()
-        model_path = '../models/resnet50.224.pth'
-        self.model.load_state_dict(torch.load(model_path))
-        self.model.eval().cuda()
+        self.model_trt = TRTModule()
+        PATH = './models/resnet50.224.trt.pth'
+        self.model_trt.load_state_dict(torch.load(PATH))
+        self.model_trt.eval().cuda()
 
         self.label_map = dict((v, k) for k, v in self.dictionary.items())
         self.size = size
