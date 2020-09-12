@@ -50,8 +50,11 @@ class TRTModel:
         tensor_image = self.image_loader(resized_image)
         tensor_image = tensor_image.cuda().contiguous()
         with torch.no_grad():
-            outputs = self.model(tensor_image)
+            outputs = self.model_trt(tensor_image)
+            print(outputs)
             _, predicted = torch.max(outputs, 1)
+            print(predicted)
             idx = predicted.item()
+            print(idx)
             face_expression = self.label_map[idx]
             return face_expression

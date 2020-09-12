@@ -4,7 +4,7 @@ import numpy as np
 import sys
 import time
 import itertools
-import realsenseFrameService as RealsenseFrameService
+from realsenseFrameService import RealsenseFrameService
 from face_expression_recognition import TRTModel
 from text_export import TextExport
 import yaml
@@ -23,6 +23,7 @@ resize_input = cfg["use_target_size"]
 # initialize face expression recognition
 print("Initializing Model...")
 face_exp_rec = TRTModel()
+realsense_frame_service = RealsenseFrameService()
 print("Done.")
 
 # # initialize logger
@@ -60,7 +61,7 @@ while True:
         start_time_old = start_time_current
         start_time_current = time.time()
 
-    frame = RealsenseFrameService.fetch_segmented_frame()
+    frame = realsense_frame_service.fetch_segmented_frame()
     # ret, frame = video_capture.read()
 
     # if not ret:
