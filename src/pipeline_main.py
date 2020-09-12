@@ -4,6 +4,7 @@ import numpy as np
 import sys
 import time
 import itertools
+import realsenseFrameService as RealsenseFrameService
 from face_expression_recognition import TRTModel
 from text_export import TextExport
 import yaml
@@ -24,25 +25,25 @@ print("Initializing Model...")
 face_exp_rec = TRTModel()
 print("Done.")
 
-# initialize logger
-if (len(sys.argv) > 2):
-    export = TextExport(sys.argv[2])
-else:
-    export = TextExport("output.yml")
+# # initialize logger
+# if (len(sys.argv) > 2):
+#     export = TextExport(sys.argv[2])
+# else:
+#     export = TextExport("output.yml")
+#
+# # init camera
+# if (len(sys.argv) > 1):
+#     video_input = sys.argv[1]
+# else:
+#     print("Kamerainput wählen (Entweder Zahl oder URL)")
+#     video_input = input()
+# try:
+#     video_input = int(video_input)
+# except:
+#     pass
 
-# init camera
-if (len(sys.argv) > 1):
-    video_input = sys.argv[1]
-else:
-    print("Kamerainput wählen (Entweder Zahl oder URL)")
-    video_input = input()
-try:
-    video_input = int(video_input)
-except:
-    pass
-
-video_capture = cv2.VideoCapture(video_input)
-video_capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+# video_capture = cv2.VideoCapture(video_input)
+# video_capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
 # init some variables
 frame_number = 0
@@ -59,23 +60,24 @@ while True:
         start_time_old = start_time_current
         start_time_current = time.time()
 
-    ret, frame = video_capture.read()
+    frame = RealsenseFrameService.fetch_segmented_frame()
+    # ret, frame = video_capture.read()
 
-    if not ret:
-        print("End of input")
-        break
+    # if not ret:
+    #     print("End of input")
+    #     break
     
     # resize input
-    if resize_input:
-        h, w, _ = frame.shape
-        target_height = int(target_width/w*h)
-        frame = cv2.resize(frame, (target_width, target_height))
+    # if resize_input:
+    #     h, w, _ = frame.shape
+    #     target_height = int(target_width/w*h)
+    #     frame = cv2.resize(frame, (target_width, target_height))
 
     # face recognition
     if frame_number % process_Nth_frame == 0:
-        small_framme = cv2.resize(
+        small_frame = cv2.resize(
             frame, (0, 0), fx=1/scale_factor, fy=1/scale_factor)
-        rgb_frame = cv2.cvtColor(small_framme, cv2.COLOR_BGR2RGB)
+        rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_frame)
         time_after_face_rec = time.time()
         print("Time Face Recognition: {:.2f}".format(
