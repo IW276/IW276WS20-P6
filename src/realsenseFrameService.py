@@ -22,13 +22,36 @@ class RealsenseFrameService:
         clipping_distance_in_meters = 1  # 1 meter
         self.clipping_distance = clipping_distance_in_meters / depth_scale
 
-    def fetch_segmented_frame(self):
+  def fetch_segmented_frame(self):
+        tic = time.time()
         align = rs.align(rs.stream.color)
+        toc = time.time()
+        print(f"Time for stream alignment: {toc - tic:0.4f} seconds")
 
+        tic = time.time()
         frames = self.pipeline.wait_for_frames()
+        toc = time.time()
+        print(f"Time for waiting for next frame: {toc - tic:0.4f} seconds")
+
+        tic = time.time()
         aligned_frames = align.process(frames)
+        toc = time.time()
+        print(f"Time for aligning frames: {toc - tic:0.4f} seconds")
+
+        tic = time.time()
         depth_frame = aligned_frames.get_depth_frame()
         color_frame = aligned_frames.get_color_frame()
+        toc = time.time()
+        print(f"Time for getting frames: {toc - tic:0.4f} seconds")
+
+        if not depth_frame or not color_frame:
+            return
+
+        tic = time.time()
+        depth_image = np.asanyarray(depth_frame.get_data())
+        color_image = np.asanyarray(color_frame.get_data())
+        toc = time.time()
+        print(f"Overall time for array creation: {toc - tic:0.4f} seconds")
 
         if not depth_frame or not color_frame:
             return
