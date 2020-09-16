@@ -61,7 +61,10 @@ while True:
         start_time_old = start_time_current
         start_time_current = time.time()
 
+    tic = time.time()
     frame = realsense_frame_service.fetch_segmented_frame()
+    toc = time.time()
+    print(f"Overall time for segmentation: {toc - tic:0.4f} seconds")
     # ret, frame = video_capture.read()
 
     # if not ret:

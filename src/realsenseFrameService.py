@@ -33,14 +33,25 @@ class RealsenseFrameService:
         if not depth_frame or not color_frame:
             return
 
+        tic = time.time()
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
+        toc = time.time()
+        print(f"Overall time for array creation: {toc - tic:0.4f} seconds")
 
         # Remove background - Set pixels further than clipping_distance to grey
         grey_color = 153
+        tic = time.time()
         depth_image_3d = np.dstack(
             (depth_image, depth_image, depth_image))  # depth image is 1 channel, color is 3 channels
-        return np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), grey_color, color_image)
+        toc = time.time()
+        print(f"Time for stacking: {toc - tic:0.4f} seconds")
+        tic = time.time()
+        segmentedImage = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), grey_color, color_image)
+        toc = time.time()
+        print(f"Time for filtering: {toc - tic:0.4f} seconds")
+
+        return segmentedImage
 
     def stop_pipeline(self):
         self.pipeline.stop()
