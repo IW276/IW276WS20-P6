@@ -77,7 +77,7 @@ class RealsenseFrameService:
         toc = time.time()
         print(f"Time for filtering: {toc - tic:0.4f} seconds")
 
-        return segmentedImage
+        return segmentedImage, depth_image
 
     def stop_pipeline(self):
         self.pipeline.stop()

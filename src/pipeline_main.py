@@ -62,7 +62,7 @@ while True:
         start_time_current = time.time()
 
     tic = time.time()
-    frame = realsense_frame_service.fetch_segmented_frame()
+    frame, depth_frame = realsense_frame_service.fetch_segmented_frame()
     toc = time.time()
     print(f"Overall time for segmentation: {toc - tic:0.4f} seconds")
     # ret, frame = video_capture.read()
@@ -129,8 +129,10 @@ while True:
         time.time() - time_after_expr_rec))
 
     # display resulting image
-    cv2.namedWindow('Video', cv2.WINDOW_NORMAL)
-    cv2.imshow('Video', frame)
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_frame, alpha=0.03), cv2.COLORMAP_JET)
+    doubleimg = np.hstack((frame, depth_colormap))
+    cv2.namedWindow('Video', cv2.WINDOW_AUTOSIZE)
+    cv2.imshow('Video', doubleimg)
 
     # log when 'l' is being pressed
     if cv2.waitKey(1) & 0xFF == ord('l'):
