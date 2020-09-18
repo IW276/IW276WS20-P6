@@ -2,7 +2,9 @@ import pyrealsense2 as rs
 import cv2
 import numpy as np
 import time
-import pyximport; pyximport.install()
+import pyximport;
+
+pyximport.install()
 import substitute
 
 
@@ -22,7 +24,7 @@ class RealsenseFrameService:
         clipping_distance_in_meters = 1  # 1 meter
         self.clipping_distance = clipping_distance_in_meters / depth_scale
 
-  def fetch_segmented_frame(self):
+    def fetch_segmented_frame(self):
         tic = time.time()
         align = rs.align(rs.stream.color)
         toc = time.time()
@@ -70,7 +72,8 @@ class RealsenseFrameService:
         toc = time.time()
         print(f"Time for stacking: {toc - tic:0.4f} seconds")
         tic = time.time()
-        segmentedImage = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), grey_color, color_image)
+        segmentedImage = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), grey_color,
+                                  color_image)
         toc = time.time()
         print(f"Time for filtering: {toc - tic:0.4f} seconds")
 
@@ -79,33 +82,30 @@ class RealsenseFrameService:
     def stop_pipeline(self):
         self.pipeline.stop()
 
-
-0
 # start_time_current = time.time()
 # start_time_old = time.time()
 
 # try:
 #     while True:
-        # time_at_start = time.time()
-        #
-        # start_time_old = start_time_current
-        # start_time_current = time.time()
-        #
-        #
-        #
-        # depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-        # images = np.hstack((bg_removed, depth_colormap))
-        #
-        # fps = 1 / (0.000001 + start_time_current - start_time_old)
-        # stats = "Output FPS: {}".format(int(fps))
-        #
-        # cv2.rectangle(images, (0, 0), (300, 25), (255, 0, 0), cv2.FILLED)
-        # font = cv2.FONT_HERSHEY_DUPLEX
-        # cv2.putText(images, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
-        #
-        # cv2.namedWindow('Align Example', cv2.WINDOW_AUTOSIZE)
-        # cv2.imshow('Align Example', bg_removed)
-        # key = cv2.waitKey(1)
+# time_at_start = time.time()
+#
+# start_time_old = start_time_current
+# start_time_current = time.time()
+#
+#
+#
+# depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+# images = np.hstack((bg_removed, depth_colormap))
+#
+# fps = 1 / (0.000001 + start_time_current - start_time_old)
+# stats = "Output FPS: {}".format(int(fps))
+#
+# cv2.rectangle(images, (0, 0), (300, 25), (255, 0, 0), cv2.FILLED)
+# font = cv2.FONT_HERSHEY_DUPLEX
+# cv2.putText(images, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
+#
+# cv2.namedWindow('Align Example', cv2.WINDOW_AUTOSIZE)
+# cv2.imshow('Align Example', bg_removed)
+# key = cv2.waitKey(1)
 
 # finally:
-
