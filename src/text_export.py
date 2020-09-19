@@ -29,9 +29,10 @@ class TextExport:
         })
         self.number += 1
 
-    def close(self):
         with open(self.output_file, 'w') as outfile:
             json.dump(self.data, outfile, indent=4)
+
+    def close(self):
         self.file.close()
 
 
