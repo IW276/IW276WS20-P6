@@ -47,6 +47,7 @@ print("Done.")
 # video_capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
 # init some variables
+export = TextExport("output.json")
 frame_number = 0
 face_locations = []
 face_expressions = []
@@ -144,5 +145,4 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-video_capture.release()
 cv2.destroyAllWindows()
