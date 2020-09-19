@@ -74,12 +74,13 @@ while True:
         if len(face_expressions) > 0:
             print("Time Face Expression Recognition: {:.2f}".format(
                 time_after_expr_rec - time_after_face_rec))
-    else:
-        cv2.waitKey(33)
+    # else:
+        # cv2.waitKey(33)
+        
 
     frame_number += 1
 
-    t1_lock = Lock()
+    # t1_lock = Lock()
 
     def generateOutput():
 
@@ -111,9 +112,9 @@ while True:
         doubleimg = np.hstack((frame, depth_colormap))
         cv2.namedWindow('Video', cv2.WINDOW_AUTOSIZE)
 
-        t1_lock.acquire()
+        # t1_lock.acquire()
         cv2.imshow('Video', doubleimg)
-        t1_lock.release()
+        # t1_lock.release()
 
     
     t1 = Thread(target = generateOutput)
@@ -129,10 +130,10 @@ while True:
     t2 = Thread(target = appendToOutput)
     t2.start()
 
-    # break when 'q' is being pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        export.close()
-        break
+    # # break when 'q' is being pressed
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    #     export.close()
+    #     break
 
 export.close()
 cv2.destroyAllWindows()
