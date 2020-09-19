@@ -4,7 +4,6 @@ import cv2
 import face_recognition
 import numpy as np
 import json
-from threading import Thread, Lock
 import concurrent.futures
 from face_expression_recognition import TRTModel
 from realsense_frame_service import RealsenseFrameService
@@ -81,37 +80,42 @@ while True:
 
     frame_number += 1
 
-    # def generateOutput():
+    def generateOutput(_cv2):
 
     # graphical output face expression recognition
-    for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions,
-                                                                            fillvalue=''):
-        top *= scale_factor
-        right *= scale_factor
-        bottom *= scale_factor
-        left *= scale_factor
-        cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-        cv2.rectangle(frame, (left, bottom),
-                    (right, bottom + 25), (0, 0, 255), cv2.FILLED)
-        font = cv2.FONT_HERSHEY_DUPLEX
-        cv2.putText(frame, face_expression, (left + 6, bottom + 18),
-                    font, 0.8, (255, 255, 255), 1)
+        for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions,
+                                                                                fillvalue=''):
+            top *= scale_factor
+            right *= scale_factor
+            bottom *= scale_factor
+            left *= scale_factor
+            _cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+            _cv2.rectangle(frame, (left, bottom),
+                        (right, bottom + 25), (0, 0, 255), _cv2.FILLED)
+            font = _cv2.FONT_HERSHEY_DUPLEX
+            _cv2.putText(frame, face_expression, (left + 6, bottom + 18),
+                        font, 0.8, (255, 255, 255), 1)
 
-    # graphical output stats
-    fps = fps_constant / (start_time_current - start_time_old)
-    stats = "Output FPS: {} | Frame: {}".format(int(fps), frame_number)
-    cv2.rectangle(frame, (0, 0), (300, 25), (255, 0, 0), cv2.FILLED)
-    font = cv2.FONT_HERSHEY_DUPLEX
-    cv2.putText(frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
-    print("Output formatting: {:.2f}".format(
-        time.time() - time_after_expr_rec))
+        # graphical output stats
+        fps = fps_constant / (start_time_current - start_time_old)
+        stats = "Output FPS: {} | Frame: {}".format(int(fps), frame_number)
+        _cv2.rectangle(frame, (0, 0), (300, 25), (255, 0, 0), _cv2.FILLED)
+        font = _cv2.FONT_HERSHEY_DUPLEX
+        _cv2.putText(frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
+        print("Output formatting: {:.2f}".format(
+            time.time() - time_after_expr_rec))
 
-    # display resulting image
-    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-    doubleimg = np.hstack((frame, depth_colormap))
-    cv2.namedWindow('Video', cv2.WINDOW_AUTOSIZE)
+        # display resulting image
+        depth_colormap = _cv2.applyColorMap(_cv2.convertScaleAbs(depth_image, alpha=0.03), _cv2.COLORMAP_JET)
+        _cv2.namedWindow('Video', _cv2.WINDOW_AUTOSIZE)
+        return np.hstack((frame, depth_colormap)), _cv2
 
-    cv2.imshow('Video', doubleimg)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+
+        future_output = executor.submit(generateOutput, cv2)
+
+        double_img, _cv2 = future_output.result()
+        _cv2.imshow('Video', double_img)
     
     # log when 'l' is being pressed
     # if cv2.waitKey(1) & 0xFF == ord('l'):
