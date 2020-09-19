@@ -75,8 +75,8 @@ while True:
         if len(face_expressions) > 0:
             print("Time Face Expression Recognition: {:.2f}".format(
                 time_after_expr_rec - time_after_face_rec))
-    # else:
-        # cv2.waitKey(33)
+    else:
+        cv2.waitKey(33)
         
 
     frame_number += 1
@@ -120,10 +120,10 @@ while True:
     #     for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):                                                   
     #         export.append(frame_number, (top, left), (right, bottom), face_expression)
 
-    # # break when 'q' is being pressed
-    # if cv2.waitKey(1) & 0xFF == ord('q'):
-    #     export.close()
-    #     break
+    # break when 'q' is being pressed
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        export.close()
+        break
 
 export.close()
 cv2.destroyAllWindows()
