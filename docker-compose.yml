@@ -4,9 +4,9 @@
 
 version: "3.3"
 services: 
-    asl-p6-recognition:
-        image: wenzeldock/asl-p6-pyrealsense2:2.0.0
-        container_name: asl-p6-recognition
+    asl:
+        image: asl # wenzeldock/asl-p6-pyrealsense2:2.0.0
+        container_name: asl
         privileged: true
         network_mode: "host"
         environment:
@@ -14,8 +14,9 @@ services:
         volumes:
             - "/home/p6/.Xauthority:/root/.Xauthority"
             - "/tmp/.X11-unix:/tmp/.X11-unix"
+            - "./models:/IW276WS20-P6/models"
         devices: 
             - "/dev/video0:/dev/video0"
-            # - "/dev/video1:/dev/video1"
-            # - "/dev/video2:/dev/video2"
+            - "/dev/video1:/dev/video1"
+            - "/dev/video2:/dev/video2"
         stdin_open: true

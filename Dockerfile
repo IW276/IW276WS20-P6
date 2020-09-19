@@ -59,8 +59,7 @@ RUN apt-get update && apt-get install -qqy x11-apps xauth vim
 RUN mkdir IW276WS20-P6
 WORKDIR /IW276WS20-P6
 COPY ./src/ .
-COPY ./models/best.pth/ .
-WORKDIR /IW276WS20-P6/src
+WORKDIR /IW276WS20-P6
 
 ENTRYPOINT /bin/bash
 
