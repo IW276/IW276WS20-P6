@@ -4,18 +4,19 @@ import os.path
 
 
 class TextExport:
-    output_file = ''
     number = 1
     data = {'expressions': []}
+    datetime_obj = datetime.datetime.now()
+    timestamp = datetime_obj.strftime("%d%b%Y%H%M")
+    output_file_path = '../logs/output' + str(timestamp) + '.json'
 
-    def __init__(self, path_and_file_name):
-        self.output_file = path_and_file_name
-        if os.path.isfile(path_and_file_name):
-            self.file = open(path_and_file_name, "a+")
-            with open(path_and_file_name) as json_file:
+    def __init__(self):
+        if os.path.isfile(self.output_file_path):
+            self.file = open(self.output_file_path, "a+")
+            with open(self.output_file_path) as json_file:
                 self.data = json.load(json_file)
         else:
-            self.file = open(path_and_file_name, "a+")
+            self.file = open(self.output_file_path, "a+")
 
     def append(self, frame_number, px, py, expression):
         datetime_obj = datetime.datetime.now()
@@ -29,7 +30,7 @@ class TextExport:
         })
         self.number += 1
 
-        with open(self.output_file, 'w') as outfile:
+        with open(self.output_file_path, 'w') as outfile:
             json.dump(self.data, outfile, indent=4)
 
     def close(self):
@@ -37,7 +38,7 @@ class TextExport:
 
 
 if __name__ == "__main__":
-    export = TextExport("test.json")
+    export = TextExport()
     export.append(3, (11, 22), (33, 44), "happy")
     export.close()
     # framenumber,(top,left),(right,bottom),face_expression
