@@ -9,7 +9,7 @@ from realsense_frame_service import RealsenseFrameService
 from text_export import TextExport
 
 with open("config.json", "r") as json_config_file:
-    config_properties = json.loads(json_config_file)
+    config_properties = json.load(json_config_file)
 
 # global variables
 fps_constant = int(config_properties["fpsConstant"])
