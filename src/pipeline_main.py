@@ -1,24 +1,22 @@
 import itertools
 import time
-
 import cv2
 import face_recognition
 import numpy as np
-import yaml
+import json
 from face_expression_recognition import TRTModel
-from realsenseFrameService import RealsenseFrameService
+from realsense_frame_service import RealsenseFrameService
 from text_export import TextExport
 
-with open("config.yml", "r") as ymlfile:
-    cfg = yaml.full_load(ymlfile)
+with open("config.json", "r") as json_config_file:
+    config_properties = json.loads(json_config_file)
 
 # global variables
-fps_constant = int(cfg["fps_constant"])
-process_Nth_frame = int(cfg["process_nth_frame"])
-scale_factor = int(cfg["scale_factor"])
-target_width = int(cfg["target_width"])
-
-resize_input = cfg["use_target_size"]
+fps_constant = int(config_properties["fpsConstant"])
+process_Nth_frame = int(config_properties["processNthFrame"])
+scale_factor = int(config_properties["scaleFactor"])
+target_width = int(config_properties["targetWidth"])
+resize_input = config_properties["useTargetSize"]
 
 # initialize face expression recognition
 print("Initializing Model...")
@@ -54,6 +52,7 @@ face_expressions = []
 cropped = 0
 start_time_current = time.time()
 start_time_old = time.time()
+
 while True:
     time_at_start = time.time()
     print("Frame: {}".format(frame_number))
@@ -62,8 +61,11 @@ while True:
         start_time_old = start_time_current
         start_time_current = time.time()
 
+    processNextFrame = frame_number % process_Nth_frame == 0
+
     tic = time.time()
-    frame, depth_frame = realsense_frame_service.fetch_segmented_frame()
+    color_image, depth_image, segmented_image = realsense_frame_service.fetch_images(processNextFrame)
+    frame = color_image
     toc = time.time()
     print(f"Overall time for segmentation: {toc - tic:0.4f} seconds")
     # ret, frame = video_capture.read()
@@ -79,7 +81,7 @@ while True:
     #     frame = cv2.resize(frame, (target_width, target_height))
 
     # face recognition
-    if frame_number % process_Nth_frame == 0:
+    if processNextFrame:
         small_frame = cv2.resize(
             frame, (0, 0), fx=1 / scale_factor, fy=1 / scale_factor)
         rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
@@ -131,7 +133,7 @@ while True:
         time.time() - time_after_expr_rec))
 
     # display resulting image
-    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_frame, alpha=0.03), cv2.COLORMAP_JET)
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
     doubleimg = np.hstack((frame, depth_colormap))
     cv2.namedWindow('Video', cv2.WINDOW_AUTOSIZE)
     cv2.imshow('Video', doubleimg)
