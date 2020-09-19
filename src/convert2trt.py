@@ -10,9 +10,7 @@ import cv2
 import numpy as np
 import sys
 
-
-
-# converts resnet18 model to TRT model
+# converts resnet model to TRT model
 # usage: python convert2trt.py <mode> <source> <target>
 # currently implemented modes: 'resnet18', 'resnet50'
 
@@ -24,21 +22,21 @@ def convert():
         sys.exit(-1)
 
     MODE = sys.argv[1]
-    resnet18_model = ResNet(MODE)
+    resnet_model = ResNet(MODE)
     PATH = sys.argv[2]
     TARGET = sys.argv[3]
     checkpoint = torch.load(PATH)
-    resnet18_model.load_state_dict(checkpoint['model_state_dict'])
-    resnet18_model.cuda().eval()
+    resnet_model.load_state_dict(checkpoint['model_state_dict'])
+    resnet_model.cuda().eval()
 
     #create dummy data
     data = torch.zeros((1, 3, 224, 224)).cuda()
 
     # convert to TensorRT feeding sample data as input
-    model_trt = torch2trt(resnet18_model, [data])
+    model_trt = torch2trt(resnet_model, [data])
 
     print("{}".format(model_trt(data)))
-    print("{}".format(resnet18_model(data)))
+    print("{}".format(resnet_model(data)))
 
     torch.save(model_trt.state_dict(), TARGET)
 
