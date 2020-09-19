@@ -139,11 +139,9 @@ while True:
     cv2.imshow('Video', doubleimg)
 
     # log when 'l' is being pressed
-    if cv2.waitKey(1) & 0xFF == ord('l'):
-        for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions,
-                                                                                 fillvalue=''):
-            export.append(frame_number, (top, left),
-                          (right, bottom), face_expression)
+    # if cv2.waitKey(1) & 0xFF == ord('l'):
+    for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):
+        export.append(frame_number, (top, left), (right, bottom), face_expression)
 
     # break when 'q' is being pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
