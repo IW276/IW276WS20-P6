@@ -4,6 +4,7 @@ import cv2
 import face_recognition
 import numpy as np
 import json
+from threading import Thread, Lock
 import concurrent.futures
 from face_expression_recognition import TRTModel
 from realsense_frame_service import RealsenseFrameService
@@ -26,7 +27,7 @@ realsense_frame_service = RealsenseFrameService()
 print("Done.")
 
 # init some variables
-export = TextExport()
+# export = TextExport()
 frame_number = 0
 face_locations = []
 face_expressions = []
@@ -53,7 +54,7 @@ while True:
     # face recognition
     if processNextFrame:
         small_frame = cv2.resize(
-            frame, (0, 0), fx=1 / scale_factor, fy=1 / scale_factor)
+            segmented_image, (0, 0), fx=1 / scale_factor, fy=1 / scale_factor)
         rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_frame)
         time_after_face_rec = time.time()
@@ -64,7 +65,7 @@ while True:
         face_expressions = []
         for (top, right, bottom, left) in face_locations:
             # Magic Face Expression Recognition
-            face_image = frame[top * scale_factor:bottom *
+            face_image = segmented_image[top * scale_factor:bottom *
                                                   scale_factor, left * scale_factor:right * scale_factor]
             face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
             face_exp = face_exp_rec.face_expression(face_image)
@@ -80,50 +81,44 @@ while True:
 
     frame_number += 1
 
-    def generateOutput(open_cv_2):
+    # def generateOutput():
 
-        # graphical output face expression recognition
-        for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions,
-                                                                                fillvalue=''):
-            top *= scale_factor
-            right *= scale_factor
-            bottom *= scale_factor
-            left *= scale_factor
-            open_cv_2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-            open_cv_2.rectangle(frame, (left, bottom),
-                        (right, bottom + 25), (0, 0, 255), open_cv_2.FILLED)
-            font = open_cv_2.FONT_HERSHEY_DUPLEX
-            open_cv_2.putText(frame, face_expression, (left + 6, bottom + 18),
-                        font, 0.8, (255, 255, 255), 1)
+    # graphical output face expression recognition
+    for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions,
+                                                                            fillvalue=''):
+        top *= scale_factor
+        right *= scale_factor
+        bottom *= scale_factor
+        left *= scale_factor
+        cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+        cv2.rectangle(frame, (left, bottom),
+                    (right, bottom + 25), (0, 0, 255), cv2.FILLED)
+        font = cv2.FONT_HERSHEY_DUPLEX
+        cv2.putText(frame, face_expression, (left + 6, bottom + 18),
+                    font, 0.8, (255, 255, 255), 1)
 
-        # graphical output stats
-        fps = fps_constant / (start_time_current - start_time_old)
-        stats = "Output FPS: {} | Frame: {}".format(int(fps), frame_number)
-        open_cv_2.rectangle(frame, (0, 0), (300, 25), (255, 0, 0), open_cv_2.FILLED)
-        font = open_cv_2.FONT_HERSHEY_DUPLEX
-        open_cv_2.putText(frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
-        print("Output formatting: {:.2f}".format(
-            time.time() - time_after_expr_rec))
+    # graphical output stats
+    fps = fps_constant / (start_time_current - start_time_old)
+    stats = "Output FPS: {} | Frame: {}".format(int(fps), frame_number)
+    cv2.rectangle(frame, (0, 0), (300, 25), (255, 0, 0), cv2.FILLED)
+    font = cv2.FONT_HERSHEY_DUPLEX
+    cv2.putText(frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
+    print("Output formatting: {:.2f}".format(
+        time.time() - time_after_expr_rec))
 
-        # display resulting image
-        depth_colormap = open_cv_2.applyColorMap(open_cv_2.convertScaleAbs(depth_image, alpha=0.03), open_cv_2.COLORMAP_JET)
-        open_cv_2.namedWindow('Video', open_cv_2.WINDOW_AUTOSIZE)
-        return np.hstack((frame, depth_colormap)), open_cv_2
+    # display resulting image
+    depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
+    doubleimg = np.hstack((frame, depth_colormap))
+    cv2.namedWindow('Video', cv2.WINDOW_AUTOSIZE)
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-
-        future_output = executor.submit(generateOutput, cv2)
-
-        double_img, open_cv_2 = future_output.result()
-        open_cv_2.imshow(double_img)
-        
+    cv2.imshow('Video', doubleimg)
     
     # log when 'l' is being pressed
     # if cv2.waitKey(1) & 0xFF == ord('l'):
 
-    def appendToOutput():
-        for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):                                                   
-            export.append(frame_number, (top, left), (right, bottom), face_expression)
+    # def appendToOutput():
+    #     for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):                                                   
+    #         export.append(frame_number, (top, left), (right, bottom), face_expression)
 
     # # break when 'q' is being pressed
     # if cv2.waitKey(1) & 0xFF == ord('q'):
