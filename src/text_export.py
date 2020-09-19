@@ -1,26 +1,42 @@
+import datetime
+import json
 import os.path
 
+
 class TextExport:
-
+    output_file = ''
     number = 1
+    data = {'expressions': []}
+    datetime_obj = datetime.datetime.now()
+    timestamp = datetime_obj.strftime("%d.%b.%Y - %H:%M:%S")
 
-    def __init__(self, pathAndFileName):
-        if os.path.isfile(pathAndFileName):
-            self.file = open(pathAndFileName, "a+");
+    def __init__(self, path_and_file_name):
+        self.output_file = path_and_file_name
+        if os.path.isfile(path_and_file_name):
+            self.file = open(path_and_file_name, "a+")
+            with open(path_and_file_name) as json_file:
+                self.data = json.load(json_file)
         else:
-            self.file = open(pathAndFileName, "a+");
-            self.file.write("Found Expressions:\n");
+            self.file = open(path_and_file_name, "a+")
 
-    def append(self, frameNumber, px, py, expression):
-        self.file.write("  Number: {}\n".format(self.number))
-        self.file.write("  Frame: {} \n".format(frameNumber))
-        self.file.write("  Position: {} {} \n".format(str(px), str(py)))
-        self.file.write("  Expression: {} \n".format(expression))
+    def append(self, frame_number, px, py, expression):
+        self.data['expressions'].append({
+            'number': self.number,
+            'frame': frame_number,
+            'position': str(px) + str(py),
+            'expression': expression,
+            'timestamp': self.timestamp
+        })
         self.number += 1
 
     def close(self):
+        with open(self.output_file, 'w') as outfile:
+            json.dump(self.data, outfile, indent=4)
         self.file.close()
 
+
 if __name__ == "__main__":
-    export = TextExport("test.txt")
-    export.append(3,(11,22),(33,44),"happy")
+    export = TextExport("test.json")
+    export.append(3, (11, 22), (33, 44), "happy")
+    export.close()
+    # framenumber,(top,left),(right,bottom),face_expression

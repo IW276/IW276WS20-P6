@@ -1,13 +1,13 @@
-import face_recognition
-import cv2
-import numpy as np
-import sys
-import time
 import itertools
-from realsenseFrameService import RealsenseFrameService
-from face_expression_recognition import TRTModel
-from text_export import TextExport
+import time
+
+import cv2
+import face_recognition
+import numpy as np
 import yaml
+from face_expression_recognition import TRTModel
+from realsenseFrameService import RealsenseFrameService
+from text_export import TextExport
 
 with open("config.yml", "r") as ymlfile:
     cfg = yaml.full_load(ymlfile)
@@ -71,7 +71,7 @@ while True:
     # if not ret:
     #     print("End of input")
     #     break
-    
+
     # resize input
     # if resize_input:
     #     h, w, _ = frame.shape
@@ -81,7 +81,7 @@ while True:
     # face recognition
     if frame_number % process_Nth_frame == 0:
         small_frame = cv2.resize(
-            frame, (0, 0), fx=1/scale_factor, fy=1/scale_factor)
+            frame, (0, 0), fx=1 / scale_factor, fy=1 / scale_factor)
         rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_frame)
         time_after_face_rec = time.time()
@@ -92,8 +92,8 @@ while True:
         face_expressions = []
         for (top, right, bottom, left) in face_locations:
             # Magic Face Expression Recognition
-            face_image = frame[top*scale_factor:bottom *
-                               scale_factor, left*scale_factor:right*scale_factor]
+            face_image = frame[top * scale_factor:bottom *
+                                                  scale_factor, left * scale_factor:right * scale_factor]
             face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
             face_exp = face_exp_rec.face_expression(face_image)
             face_expressions.append(face_exp)
@@ -108,7 +108,8 @@ while True:
     frame_number += 1
 
     # graphical output face expression recognition
-    for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):
+    for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions,
+                                                                             fillvalue=''):
         top *= scale_factor
         right *= scale_factor
         bottom *= scale_factor
@@ -137,12 +138,15 @@ while True:
 
     # log when 'l' is being pressed
     if cv2.waitKey(1) & 0xFF == ord('l'):
-        for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):
+        for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions,
+                                                                                 fillvalue=''):
             export.append(frame_number, (top, left),
                           (right, bottom), face_expression)
 
     # break when 'q' is being pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
+        export.close()
         break
 
+export.close()
 cv2.destroyAllWindows()
