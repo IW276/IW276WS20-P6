@@ -4,7 +4,7 @@ import cv2
 import face_recognition
 import numpy as np
 import json
-import threading
+from threading import Thread, Lock
 from face_expression_recognition import TRTModel
 from realsense_frame_service import RealsenseFrameService
 from text_export import TextExport
@@ -79,6 +79,8 @@ while True:
 
     frame_number += 1
 
+    t1_lock = Lock()
+
     def generateOutput():
 
         # graphical output face expression recognition
@@ -108,9 +110,13 @@ while True:
         depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
         doubleimg = np.hstack((frame, depth_colormap))
         cv2.namedWindow('Video', cv2.WINDOW_AUTOSIZE)
-        cv2.imshow('Video', doubleimg)
 
-    t1 = threading.Thread(target = generateOutput)
+        t1_lock.acquire()
+        cv2.imshow('Video', doubleimg)
+        t1_lock.release()
+
+    
+    t1 = Thread(target = generateOutput)
     t1.start()
     
     # log when 'l' is being pressed
@@ -120,9 +126,9 @@ while True:
         for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):                                                   
             export.append(frame_number, (top, left), (right, bottom), face_expression)
 
-    t2 = threading.Thread(target = appendToOutput)
+    t2 = Thread(target = appendToOutput)
     t2.start()
-    
+
     # break when 'q' is being pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):
         export.close()
