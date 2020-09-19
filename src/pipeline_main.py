@@ -24,26 +24,6 @@ face_exp_rec = TRTModel()
 realsense_frame_service = RealsenseFrameService()
 print("Done.")
 
-# # initialize logger
-# if (len(sys.argv) > 2):
-#     export = TextExport(sys.argv[2])
-# else:
-#     export = TextExport("output.yml")
-#
-# # init camera
-# if (len(sys.argv) > 1):
-#     video_input = sys.argv[1]
-# else:
-#     print("Kamerainput wählen (Entweder Zahl oder URL)")
-#     video_input = input()
-# try:
-#     video_input = int(video_input)
-# except:
-#     pass
-
-# video_capture = cv2.VideoCapture(video_input)
-# video_capture.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-
 # init some variables
 export = TextExport("output.json")
 frame_number = 0
@@ -68,17 +48,6 @@ while True:
     frame = color_image
     toc = time.time()
     print(f"Overall time for segmentation: {toc - tic:0.4f} seconds")
-    # ret, frame = video_capture.read()
-
-    # if not ret:
-    #     print("End of input")
-    #     break
-
-    # resize input
-    # if resize_input:
-    #     h, w, _ = frame.shape
-    #     target_height = int(target_width/w*h)
-    #     frame = cv2.resize(frame, (target_width, target_height))
 
     # face recognition
     if processNextFrame:
