@@ -4,7 +4,7 @@ import cv2
 import face_recognition
 import numpy as np
 import json
-from threading import Thread, Lock
+import concurrent.futures
 from face_expression_recognition import TRTModel
 from realsense_frame_service import RealsenseFrameService
 from text_export import TextExport
@@ -80,9 +80,7 @@ while True:
 
     frame_number += 1
 
-    # t1_lock = Lock()
-
-    def generateOutput():
+    def generateOutput(open_cv_2):
 
         # graphical output face expression recognition
         for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions,
@@ -91,34 +89,34 @@ while True:
             right *= scale_factor
             bottom *= scale_factor
             left *= scale_factor
-            cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-            cv2.rectangle(frame, (left, bottom),
-                        (right, bottom + 25), (0, 0, 255), cv2.FILLED)
-            font = cv2.FONT_HERSHEY_DUPLEX
-            cv2.putText(frame, face_expression, (left + 6, bottom + 18),
+            open_cv_2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+            open_cv_2.rectangle(frame, (left, bottom),
+                        (right, bottom + 25), (0, 0, 255), open_cv_2.FILLED)
+            font = open_cv_2.FONT_HERSHEY_DUPLEX
+            open_cv_2.putText(frame, face_expression, (left + 6, bottom + 18),
                         font, 0.8, (255, 255, 255), 1)
 
         # graphical output stats
         fps = fps_constant / (start_time_current - start_time_old)
         stats = "Output FPS: {} | Frame: {}".format(int(fps), frame_number)
-        cv2.rectangle(frame, (0, 0), (300, 25), (255, 0, 0), cv2.FILLED)
-        font = cv2.FONT_HERSHEY_DUPLEX
-        cv2.putText(frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
+        open_cv_2.rectangle(frame, (0, 0), (300, 25), (255, 0, 0), open_cv_2.FILLED)
+        font = open_cv_2.FONT_HERSHEY_DUPLEX
+        open_cv_2.putText(frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
         print("Output formatting: {:.2f}".format(
             time.time() - time_after_expr_rec))
 
         # display resulting image
-        depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-        doubleimg = np.hstack((frame, depth_colormap))
-        cv2.namedWindow('Video', cv2.WINDOW_AUTOSIZE)
+        depth_colormap = open_cv_2.applyColorMap(open_cv_2.convertScaleAbs(depth_image, alpha=0.03), open_cv_2.COLORMAP_JET)
+        open_cv_2.namedWindow('Video', open_cv_2.WINDOW_AUTOSIZE)
+        return np.hstack((frame, depth_colormap)), open_cv_2
 
-        # t1_lock.acquire()
-        cv2.imshow('Video', doubleimg)
-        # t1_lock.release()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
 
-    
-    t1 = Thread(target = generateOutput)
-    t1.start()
+        future_output = executor.submit(generateOutput, cv2)
+
+        double_img, open_cv_2 = future_output.result()
+        open_cv_2.imshow(double_img)
+        
     
     # log when 'l' is being pressed
     # if cv2.waitKey(1) & 0xFF == ord('l'):
@@ -126,9 +124,6 @@ while True:
     def appendToOutput():
         for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):                                                   
             export.append(frame_number, (top, left), (right, bottom), face_expression)
-
-    t2 = Thread(target = appendToOutput)
-    t2.start()
 
     # # break when 'q' is being pressed
     # if cv2.waitKey(1) & 0xFF == ord('q'):
