@@ -7,8 +7,6 @@ class TextExport:
     output_file = ''
     number = 1
     data = {'expressions': []}
-    datetime_obj = datetime.datetime.now()
-    timestamp = datetime_obj.strftime("%d.%b.%Y - %H:%M:%S")
 
     def __init__(self, path_and_file_name):
         self.output_file = path_and_file_name
@@ -20,12 +18,14 @@ class TextExport:
             self.file = open(path_and_file_name, "a+")
 
     def append(self, frame_number, px, py, expression):
+        datetime_obj = datetime.datetime.now()
+        timestamp = datetime_obj.strftime("%d.%b.%Y - %H:%M:%S")
         self.data['expressions'].append({
             'number': self.number,
             'frame': frame_number,
             'position': str(px) + str(py),
             'expression': expression,
-            'timestamp': self.timestamp
+            'timestamp': timestamp
         })
         self.number += 1
 
