@@ -57,9 +57,9 @@ class Pipeline():
 
     def process_frame(self, current_iteration_item):
 
-        segmented_frame = current_iteration_item.segmented_frame
         # face recognition
         if current_iteration_item.process_next_frame:
+            segmented_frame = current_iteration_item.segmented_frame
             small_frame = cv2.resize(
                 segmented_frame, (0, 0), fx=1 / self.scale_factor, fy=1 / self.scale_factor)
             rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
@@ -90,16 +90,17 @@ class Pipeline():
                     time_after_expr_rec - time_after_face_rec))
         else:
             cv2.waitKey(33)
-            
+
         return current_iteration_item
 
     def generate_output(self, _cv2, current_iteration_item):
 
     # graphical output face expression recognition
+        color_frame = current_iteration_item.color_frame
+
         for (top, right, bottom, left), face_expression in itertools.zip_longest(current_iteration_item.face_locations, 
                                                                                 current_iteration_item.face_expressions,
                                                                                 fillvalue=''):
-            color_frame = current_iteration_item.color_frame
             top *= self.scale_factor
             right *= self.scale_factor
             bottom *= self.scale_factor
@@ -184,9 +185,9 @@ class Pipeline():
 
         next_frame_queue = Queue() 
         process_frame_queue = Queue()
-        next_frame_thread = Thread(target = self.next_frame_loop, args =(next_frame_queue)) 
-        process_frame_thread = Thread(target = self.process_frame_loop, args =(next_frame_queue, process_frame_queue))
-        json_output_thread = Thread(target = self.json_output_loop, args =(process_frame_queue))
+        next_frame_thread = Thread(target = self.next_frame_loop, args =(next_frame_queue,)) 
+        process_frame_thread = Thread(target = self.process_frame_loop, args =(next_frame_queue, process_frame_queue,))
+        json_output_thread = Thread(target = self.json_output_loop, args =(process_frame_queue,))
    
         next_frame_thread.start() 
         process_frame_thread.start() 
