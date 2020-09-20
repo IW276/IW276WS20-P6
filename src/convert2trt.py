@@ -43,9 +43,8 @@ def convert():
 
 class ResNet(nn.Module):
 
-    def __init__(
-        self, arch, pretrained=False, progress=False, num_cls=8, **kwargs
-    ):
+    def __init__(self, arch, pretrained=False, progress=False, num_cls=8, **kwargs):
+        
         super().__init__()
 
         if(arch == 'resnet18'):

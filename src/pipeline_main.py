@@ -10,23 +10,7 @@ from threading import Thread
 from face_expression_recognition import TRTModel
 from realsense_frame_service import RealsenseFrameService
 from text_export import TextExport
-
-class CurrentIterationItem:
-
-    time_after_expr_rec = 0
-    color_frame = None
-    depth_frame = None
-    segmented_frame = None
-    _cv2 = None
-    face_locations = []
-    face_expressions = []
-
-    def __init__(self, start_time_current, start_time_old, time_at_start, process_next_frame, frame_number):
-        self.start_time_current = start_time_current
-        self.start_time_old = start_time_old
-        self.time_at_start = time_at_start
-        self.process_next_frame = process_next_frame
-        self.frame_number = frame_number
+from current_iteration_item import CurrentIterationItem
 
 class Pipeline():
 
@@ -48,6 +32,8 @@ class Pipeline():
 
     # init some variables
     export = TextExport()
+    face_locations = []
+    face_expressions = [] 
 
     def get_next_frame(self, current_iteration_item):
 
@@ -67,15 +53,15 @@ class Pipeline():
             small_frame = _cv2.resize(
                 segmented_frame, (0, 0), fx=1 / self.scale_factor, fy=1 / self.scale_factor)
             rgb_frame = _cv2.cvtColor(small_frame, _cv2.COLOR_BGR2RGB)
-            face_locations = face_recognition.face_locations(rgb_frame)
-            current_iteration_item.face_locations = face_locations
+            self.face_locations = face_recognition.face_locations(rgb_frame)
+            current_iteration_item.face_locations = self.face_locations
             time_after_face_rec = time.time()
             print("Time Face Recognition: {:.2f}".format(
                 time_after_face_rec - current_iteration_item.time_at_start))
 
             # face expression recognition
             face_expressions = []
-            for (top, right, bottom, left) in face_locations:
+            for (top, right, bottom, left) in self.face_locations:
                 # Magic Face Expression Recognition
                 face_image = segmented_frame[top * self.scale_factor:bottom 
                                                 * self.scale_factor, left 
@@ -84,7 +70,7 @@ class Pipeline():
 
                 face_image = _cv2.cvtColor(face_image, _cv2.COLOR_BGR2RGB)
                 face_exp = self.face_exp_rec.face_expression(face_image)
-                face_expressions.append(face_exp)
+                self.face_expressions.append(face_exp)
                 
             current_iteration_item.face_expressions = face_expressions
             time_after_expr_rec = time.time()
@@ -105,9 +91,7 @@ class Pipeline():
         color_frame = current_iteration_item.color_frame
         _cv2 = current_iteration_item._cv2
 
-        for (top, right, bottom, left), face_expression in itertools.zip_longest(current_iteration_item.face_locations, 
-                                                                                current_iteration_item.face_expressions,
-                                                                                fillvalue=''):
+        for (top, right, bottom, left), face_expression in itertools.zip_longest(self.face_locations, self.face_expressions, fillvalue=''):
             print((top, right, bottom, left))
             print(face_expression)
             top *= self.scale_factor
@@ -137,10 +121,7 @@ class Pipeline():
     def write_json_output(self, current_iteration_item):
         # log when 'l' is being pressed
         # if cv2.waitKey(1) & 0xFF == ord('l'):
-        for (top, right, bottom, left), face_expression in itertools.zip_longest(current_iteration_item.face_locations, 
-                                                                                current_iteration_item.face_expressions, 
-                                                                                fillvalue=''):      
-
+        for (top, right, bottom, left), face_expression in itertools.zip_longest(self.face_locations, self.face_expressions, fillvalue=''):      
             self.export.append(current_iteration_item.frame_number, (top, left), (right, bottom), face_expression)
 
     def json_output_loop(self, process_frame_queue):
@@ -207,8 +188,6 @@ class Pipeline():
         frame_number = 0
         start_time_current = time.time()
         start_time_old = time.time()
-        face_locations = []
-        face_expressions = [] 
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
 
@@ -228,8 +207,8 @@ class Pipeline():
                 current_iteration_item.depth_frame = depth_frame
                 current_iteration_item.segmented_frame = segmented_frame
                 current_iteration_item._cv2 = cv2
-                current_iteration_item.face_locations = face_locations
-                current_iteration_item.face_expressions = face_expressions
+                current_iteration_item.face_locations = self.face_locations
+                current_iteration_item.face_expressions = self.face_expressions
 
                 current_iteration_item = self.process_frame(current_iteration_item)
 
