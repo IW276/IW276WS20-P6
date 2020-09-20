@@ -58,7 +58,8 @@ class Pipeline():
 
     def process_frame(self, current_iteration_item):
         
-        _cv2 = cv2
+        _cv2 = current_iteration_item._cv2
+        
         # face recognition
         if current_iteration_item.process_next_frame:
             segmented_frame = current_iteration_item.segmented_frame
@@ -190,6 +191,7 @@ class Pipeline():
             current_iteration_item.color_frame = color_frame
             current_iteration_item.depth_frame = depth_frame
             current_iteration_item.segmented_frame = segmented_frame
+            current_iteration_item._cv2 = cv2
             next_frame_queue.put(current_iteration_item)
 
             frame_number += 1
