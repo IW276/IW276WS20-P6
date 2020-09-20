@@ -26,7 +26,7 @@ realsense_frame_service = RealsenseFrameService()
 print("Done.")
 
 # init some variables
-# export = TextExport()
+export = TextExport()
 frame_number = 0
 face_locations = []
 face_expressions = []
@@ -41,19 +41,18 @@ while True:
     if frame_number % fps_constant == 0:
         start_time_old = start_time_current
         start_time_current = time.time()
-
-    processNextFrame = frame_number % process_Nth_frame == 0
+    
+    process_next_frame = frame_number % process_Nth_frame == 0
 
     tic = time.time()
-    color_image, depth_image, segmented_image = realsense_frame_service.fetch_images(processNextFrame)
-    frame = color_image
+    color_frame, depth_frame, segmented_frame = realsense_frame_service.fetch_images(process_next_frame)
     toc = time.time()
     print(f"Overall time for segmentation: {toc - tic:0.4f} seconds")
 
     # face recognition
-    if processNextFrame:
+    if process_next_frame:
         small_frame = cv2.resize(
-            segmented_image, (0, 0), fx=1 / scale_factor, fy=1 / scale_factor)
+            segmented_frame, (0, 0), fx=1 / scale_factor, fy=1 / scale_factor)
         rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
         face_locations = face_recognition.face_locations(rgb_frame)
         time_after_face_rec = time.time()
@@ -64,7 +63,7 @@ while True:
         face_expressions = []
         for (top, right, bottom, left) in face_locations:
             # Magic Face Expression Recognition
-            face_image = segmented_image[top * scale_factor:bottom *
+            face_image = segmented_frame[top * scale_factor:bottom *
                                                   scale_factor, left * scale_factor:right * scale_factor]
             face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
             face_exp = face_exp_rec.face_expression(face_image)
@@ -80,7 +79,7 @@ while True:
 
     frame_number += 1
 
-    def generateOutput(_cv2):
+    def generate_output(_cv2):
 
     # graphical output face expression recognition
         for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions,
@@ -89,40 +88,40 @@ while True:
             right *= scale_factor
             bottom *= scale_factor
             left *= scale_factor
-            _cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-            _cv2.rectangle(frame, (left, bottom),
+            _cv2.rectangle(color_frame, (left, top), (right, bottom), (0, 0, 255), 2)
+            _cv2.rectangle(color_frame, (left, bottom),
                         (right, bottom + 25), (0, 0, 255), _cv2.FILLED)
             font = _cv2.FONT_HERSHEY_DUPLEX
-            _cv2.putText(frame, face_expression, (left + 6, bottom + 18),
+            _cv2.putText(color_frame, face_expression, (left + 6, bottom + 18),
                         font, 0.8, (255, 255, 255), 1)
 
         # graphical output stats
         fps = fps_constant / (start_time_current - start_time_old)
         stats = "Output FPS: {} | Frame: {}".format(int(fps), frame_number)
-        _cv2.rectangle(frame, (0, 0), (300, 25), (255, 0, 0), _cv2.FILLED)
+        _cv2.rectangle(color_frame, (0, 0), (300, 25), (255, 0, 0), _cv2.FILLED)
         font = _cv2.FONT_HERSHEY_DUPLEX
-        _cv2.putText(frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
+        _cv2.putText(color_frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
         print("Output formatting: {:.2f}".format(
             time.time() - time_after_expr_rec))
 
         # display resulting image
-        depth_colormap = _cv2.applyColorMap(_cv2.convertScaleAbs(depth_image, alpha=0.03), _cv2.COLORMAP_JET)
+        depth_colormap = _cv2.applyColorMap(_cv2.convertScaleAbs(depth_frame, alpha=0.03), _cv2.COLORMAP_JET)
         _cv2.namedWindow('Video', _cv2.WINDOW_AUTOSIZE)
-        return np.hstack((frame, depth_colormap)), _cv2
+        return np.hstack((color_frame, depth_colormap)), _cv2
+
+    def append_to_output_json():
+        # log when 'l' is being pressed
+        # if cv2.waitKey(1) & 0xFF == ord('l'):
+        for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):                                                   
+            export.append(frame_number, (top, left), (right, bottom), face_expression)
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
 
-        future_output = executor.submit(generateOutput, cv2)
+        future_output = executor.submit(generate_output, cv2)
+        future_json_output = executor.submit(append_to_output_json)
 
         double_img, _cv2 = future_output.result()
         _cv2.imshow('Video', double_img)
-    
-    # log when 'l' is being pressed
-    # if cv2.waitKey(1) & 0xFF == ord('l'):
-
-    # def appendToOutput():
-    #     for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):                                                   
-    #         export.append(frame_number, (top, left), (right, bottom), face_expression)
 
     # break when 'q' is being pressed
     if cv2.waitKey(1) & 0xFF == ord('q'):

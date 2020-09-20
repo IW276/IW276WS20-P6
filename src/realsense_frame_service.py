@@ -68,13 +68,6 @@ class RealsenseFrameService:
             toc = time.time()
             print(f"Overall time for array creation: {toc - tic:0.4f} seconds")
 
-            # tic = time.time()
-            # (image_x_size, image_y_size) = depth_frame.shape
-            # aligned_depth_frame = np.zeros(depth_frame.shape)
-            # aligned_depth_frame[0:image_x_size - self.offset_y, 0:image_y_size - self.offset_x] = depth_frame[self.offset_y:, self.offset_x:]
-            # toc = time.time()
-            # print(f"Time for self alignment: {toc - tic:0.4f} seconds")
-
             # Remove background - Set pixels further than clipping_distance to grey
 
             tic = time.time()
@@ -121,30 +114,3 @@ class RealsenseFrameService:
     def stop_pipeline(self):
         self.pipeline.stop()
 
-# start_time_current = time.time()
-# start_time_old = time.time()
-
-# try:
-#     while True:
-# time_at_start = time.time()
-#
-# start_time_old = start_time_current
-# start_time_current = time.time()
-#
-#
-#
-# depth_colormap = cv2.applyColorMap(cv2.convertScaleAbs(depth_image, alpha=0.03), cv2.COLORMAP_JET)
-# images = np.hstack((bg_removed, depth_colormap))
-#
-# fps = 1 / (0.000001 + start_time_current - start_time_old)
-# stats = "Output FPS: {}".format(int(fps))
-#
-# cv2.rectangle(images, (0, 0), (300, 25), (255, 0, 0), cv2.FILLED)
-# font = cv2.FONT_HERSHEY_DUPLEX
-# cv2.putText(images, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
-#
-# cv2.namedWindow('Align Example', cv2.WINDOW_AUTOSIZE)
-# cv2.imshow('Align Example', bg_removed)
-# key = cv2.waitKey(1)
-
-# finally:
