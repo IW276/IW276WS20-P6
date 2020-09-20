@@ -4,6 +4,7 @@ import cv2
 import face_recognition
 import numpy as np
 import json
+import concurrent.futures
 from queue import Queue 
 from threading import Thread 
 from face_expression_recognition import TRTModel
@@ -151,19 +152,22 @@ class Pipeline():
 
     def video_output_loop(self, process_frame_queue):
 
-        while True:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
 
-            current_iteration_item = process_frame_queue.get()
-            double_img, _cv2 = self.generate_output(current_iteration_item)
-            _cv2.imshow('Video', double_img)
+                while True:
 
-                        # break when 'q' is being pressed
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+                    current_iteration_item = process_frame_queue.get()
+                    video_output_future = executor.submit(self.generate_output, current_iteration_item)
+                    double_img, _cv2 = video_output_future.result()
+                    _cv2.imshow('Video', double_img)
+
+                    # break when 'q' is being pressed
+                    if cv2.waitKey(1) & 0xFF == ord('q'):
+                        self.export.close()
+                        break
+
                 self.export.close()
-                break
-
-        self.export.close()
-        cv2.destroyAllWindows()
+                cv2.destroyAllWindows()
 
     def process_frame_loop(self, next_frame_queue, process_frame_queue):
 
