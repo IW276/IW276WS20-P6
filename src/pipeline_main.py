@@ -123,6 +123,7 @@ class Pipeline():
         # graphical output stats
         fps = self.fps_constant / (current_iteration_item.start_time_current - current_iteration_item.start_time_old)
         stats = "Output FPS: {} | Frame: {}".format(int(fps), current_iteration_item.frame_number)
+        print("Output FPS:" + int(fps))
         _cv2.rectangle(color_frame, (0, 0), (300, 25), (255, 0, 0), _cv2.FILLED)
         font = _cv2.FONT_HERSHEY_DUPLEX
         _cv2.putText(color_frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
