@@ -181,6 +181,11 @@ class Pipeline():
 
             frame_number += 1
 
+            # break when 'q' is being pressed
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.export.close()
+                break
+
     def processing_loop(self):
 
         next_frame_queue = Queue() 
@@ -193,11 +198,6 @@ class Pipeline():
         process_frame_thread.start() 
         json_output_thread.start() 
         self.video_output_loop(process_frame_queue)
-
-        # break when 'q' is being pressed
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            self.export.close()
-            # break
 
         self.export.close()
         cv2.destroyAllWindows()
