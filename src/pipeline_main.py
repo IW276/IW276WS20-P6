@@ -124,7 +124,6 @@ class Pipeline():
         # graphical output stats
         fps = self.fps_constant / (current_iteration_item.start_time_current - current_iteration_item.start_time_old)
         stats = "Output FPS: {} | Frame: {}".format(int(fps), current_iteration_item.frame_number)
-        print("Output FPS:" + int(fps))
         _cv2.rectangle(color_frame, (0, 0), (300, 25), (255, 0, 0), _cv2.FILLED)
         font = _cv2.FONT_HERSHEY_DUPLEX
         _cv2.putText(color_frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
@@ -135,7 +134,7 @@ class Pipeline():
         _cv2.namedWindow('Video', _cv2.WINDOW_AUTOSIZE)
         return np.hstack((color_frame, depth_colormap)), _cv2
 
-    def append_to_output_json(self, current_iteration_item):
+    def write_json_output(self, current_iteration_item):
         # log when 'l' is being pressed
         # if cv2.waitKey(1) & 0xFF == ord('l'):
         for (top, right, bottom, left), face_expression in itertools.zip_longest(current_iteration_item.face_locations, 
@@ -148,7 +147,7 @@ class Pipeline():
         
         while True:
             current_iteration_item = process_frame_queue.get()
-            self.append_to_output_json(current_iteration_item)
+            self.write_json_output(current_iteration_item)
 
     def video_output_loop(self, process_frame_queue):
 
@@ -203,7 +202,57 @@ class Pipeline():
 
             frame_number += 1
 
-    def processing_loop(self):
+    def process(self):
+
+        frame_number = 0
+        start_time_current = time.time()
+        start_time_old = time.time()
+        face_locations = []
+        face_expressions = [] 
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+
+            while True:
+
+                time_at_start = time.time()
+                print("Frame: {}".format(frame_number))
+                # set timers for FPS calculation
+                if frame_number % self.fps_constant == 0:
+                    start_time_old = start_time_current
+                    start_time_current = time.time()
+
+                process_next_frame = frame_number % self.process_Nth_frame == 0
+                current_iteration_item = CurrentIterationItem(start_time_current, start_time_old, time_at_start, process_next_frame, frame_number)
+                color_frame, depth_frame, segmented_frame = self.get_next_frame(current_iteration_item)
+                current_iteration_item.color_frame = color_frame
+                current_iteration_item.depth_frame = depth_frame
+                current_iteration_item.segmented_frame = segmented_frame
+                current_iteration_item._cv2 = cv2
+                current_iteration_item.face_locations = face_locations
+                current_iteration_item.face_expressions = face_expressions
+
+                current_iteration_item = self.process_frame(current_iteration_item)
+
+                video_output_future = executor.submit(self.generate_output, current_iteration_item)
+                executor.submit(self.write_json_output, current_iteration_item)
+                double_img, _cv2 = video_output_future.result()
+                _cv2.imshow('Video', double_img)
+                
+                face_locations = current_iteration_item.face_locations
+                face_expressions = current_iteration_item.face_expressions
+
+                frame_number += 1
+
+                # break when 'q' is being pressed
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    self.export.close()
+                    break
+
+            self.export.close()
+            cv2.destroyAllWindows()
+
+
+    def process_with_threads(self):
 
         next_frame_queue = Queue() 
         process_frame_queue = Queue()
@@ -217,6 +266,6 @@ class Pipeline():
         self.video_output_loop(process_frame_queue)
 
 pipeline = Pipeline()
-pipeline.processing_loop()
+pipeline.process()
 
 
