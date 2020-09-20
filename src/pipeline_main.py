@@ -53,7 +53,7 @@ class Pipeline():
         tic = time.time()
         color_frame, depth_frame, segmented_frame = self.realsense_frame_service.fetch_images(current_iteration_item.process_next_frame)
         toc = time.time()
-        print(f"Overall time for segmentation: {toc - tic:0.4f} seconds")
+        # print(f"Overall time for segmentation: {toc - tic:0.4f} seconds")
         return color_frame, depth_frame, segmented_frame
 
     def process_frame(self, current_iteration_item):
@@ -107,6 +107,8 @@ class Pipeline():
         for (top, right, bottom, left), face_expression in itertools.zip_longest(current_iteration_item.face_locations, 
                                                                                 current_iteration_item.face_expressions,
                                                                                 fillvalue=''):
+            print((top, right, bottom, left))
+            print(face_expression)
             top *= self.scale_factor
             right *= self.scale_factor
             bottom *= self.scale_factor
@@ -124,7 +126,7 @@ class Pipeline():
         _cv2.rectangle(color_frame, (0, 0), (300, 25), (255, 0, 0), _cv2.FILLED)
         font = _cv2.FONT_HERSHEY_DUPLEX
         _cv2.putText(color_frame, stats, (6, 19), font, 0.5, (255, 255, 255), 1)
-        print("Output formatting: {:.2f}".format(time.time() - current_iteration_item.time_after_expr_rec))
+        # print("Output formatting: {:.2f}".format(time.time() - current_iteration_item.time_after_expr_rec))
 
         # display resulting image
         depth_colormap = _cv2.applyColorMap(_cv2.convertScaleAbs(current_iteration_item.depth_frame, alpha=0.03), _cv2.COLORMAP_JET)

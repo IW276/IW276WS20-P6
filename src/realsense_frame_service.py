@@ -30,7 +30,7 @@ class RealsenseFrameService:
         tic = time.time()
         frames = self.pipeline.wait_for_frames()
         toc = time.time()
-        print(f"Time for waiting for next frame: {toc - tic:0.4f} seconds")
+        # print(f"Time for waiting for next frame: {toc - tic:0.4f} seconds")
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
 
@@ -51,13 +51,13 @@ class RealsenseFrameService:
             tic = time.time()
             aligned_frames = self.align.process(frames)
             toc = time.time()
-            print(f"Time for aligning frames: {toc - tic:0.4f} seconds")
+            # print(f"Time for aligning frames: {toc - tic:0.4f} seconds")
 
             tic = time.time()
             depth_frame = aligned_frames.get_depth_frame()
             color_frame = aligned_frames.get_color_frame()
             toc = time.time()
-            print(f"Time for getting frames: {toc - tic:0.4f} seconds")
+            # print(f"Time for getting frames: {toc - tic:0.4f} seconds")
 
             if not depth_frame or not color_frame:
                 return
@@ -66,7 +66,7 @@ class RealsenseFrameService:
             depth_image = np.asanyarray(depth_frame.get_data())
             color_image = np.asanyarray(color_frame.get_data())
             toc = time.time()
-            print(f"Overall time for array creation: {toc - tic:0.4f} seconds")
+            # print(f"Overall time for array creation: {toc - tic:0.4f} seconds")
 
             # Remove background - Set pixels further than clipping_distance to grey
 
@@ -74,12 +74,12 @@ class RealsenseFrameService:
             depth_image_3d = np.dstack(
                 (depth_image, depth_image, depth_image))  # depth image is 1 channel, color is 3 channels
             toc = time.time()
-            print(f"Time for stacking: {toc - tic:0.4f} seconds")
+            # print(f"Time for stacking: {toc - tic:0.4f} seconds")
 
             tic = time.time()
             segmented_image = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), self.grey_color, color_image)
             toc = time.time()
-            print(f"Time for filtering: {toc - tic:0.4f} seconds")
+            # print(f"Time for filtering: {toc - tic:0.4f} seconds")
 
             return segmented_image
 
@@ -88,13 +88,13 @@ class RealsenseFrameService:
         tic = time.time()
         frames = self.pipeline.wait_for_frames()
         toc = time.time()
-        print(f"Time for waiting for next frame: {toc - tic:0.4f} seconds")
+        # print(f"Time for waiting for next frame: {toc - tic:0.4f} seconds")
 
         tic = time.time()
         depth_frame = frames.get_depth_frame()
         color_frame = frames.get_color_frame()
         toc = time.time()
-        print(f"Time for getting frames: {toc - tic:0.4f} seconds")
+        # print(f"Time for getting frames: {toc - tic:0.4f} seconds")
 
         if not depth_frame or not color_frame:
             return
@@ -103,7 +103,7 @@ class RealsenseFrameService:
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
         toc = time.time()
-        print(f"Overall time for array creation: {toc - tic:0.4f} seconds")
+        # print(f"Overall time for array creation: {toc - tic:0.4f} seconds")
 
         if not depth_frame or not color_frame:
             return
