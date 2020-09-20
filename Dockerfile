@@ -1,4 +1,4 @@
-FROM nvcr.io/nvidia/l4t-pytorch:r32.4.3-pth1.6-py3
+FROM dustynv/jetson-inference:r32.4.3
 
 RUN echo "Build our Container based on L4T Pytorch"
 RUN nvcc --version
@@ -55,16 +55,6 @@ RUN mv /usr/local/lib/python2.7/pyrealsense2 /usr/local/lib/python3.6/dist-packa
 RUN mv /librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
 
 RUN apt-get update && apt-get install -qqy x11-apps xauth vim
-
-WORKDIR /
-RUN git clone --recursive https://github.com/dusty-nv/jetson-inference
-WORKDIR /jetson-inference
-RUN mkdir build
-WORKDIR build
-RUN cmake ../
-RUN make -j4
-RUN make install
-RUN ldconfig
 
 RUN mkdir IW276WS20-P6
 WORKDIR /IW276WS20-P6
