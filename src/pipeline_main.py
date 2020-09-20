@@ -16,6 +16,7 @@ class CurrentIterationItem:
     color_frame = None
     depth_frame = None
     segmented_frame = None
+    _cv2 = None
     face_locations = []
     face_expressions = []
 
@@ -56,13 +57,14 @@ class Pipeline():
         return color_frame, depth_frame, segmented_frame
 
     def process_frame(self, current_iteration_item):
-
+        
+        _cv2 = cv2
         # face recognition
         if current_iteration_item.process_next_frame:
             segmented_frame = current_iteration_item.segmented_frame
-            small_frame = cv2.resize(
+            small_frame = _cv2.resize(
                 segmented_frame, (0, 0), fx=1 / self.scale_factor, fy=1 / self.scale_factor)
-            rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
+            rgb_frame = _cv2.cvtColor(small_frame, _cv2.COLOR_BGR2RGB)
             face_locations = face_recognition.face_locations(rgb_frame)
             current_iteration_item.face_locations = face_locations
             time_after_face_rec = time.time()
@@ -78,25 +80,28 @@ class Pipeline():
                                                 * self.scale_factor:right 
                                                 * self.scale_factor]
 
-                face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
+                face_image = _cv2.cvtColor(face_image, _cv2.COLOR_BGR2RGB)
                 face_exp = self.face_exp_rec.face_expression(face_image)
                 face_expressions.append(face_exp)
                 
             current_iteration_item.face_expressions = face_expressions
             time_after_expr_rec = time.time()
             current_iteration_item.time_after_expr_rec = time_after_expr_rec
+            current_iteration_item._cv2 = _cv2
             if len(face_expressions) > 0:
                 print("Time Face Expression Recognition: {:.2f}".format(
                     time_after_expr_rec - time_after_face_rec))
+            
         else:
             cv2.waitKey(33)
 
         return current_iteration_item
 
-    def generate_output(self, _cv2, current_iteration_item):
+    def generate_output(self, current_iteration_item):
 
     # graphical output face expression recognition
         color_frame = current_iteration_item.color_frame
+        _cv2 = current_iteration_item._cv2
 
         for (top, right, bottom, left), face_expression in itertools.zip_longest(current_iteration_item.face_locations, 
                                                                                 current_iteration_item.face_expressions,
@@ -145,8 +150,16 @@ class Pipeline():
         while True:
 
             current_iteration_item = process_frame_queue.get()
-            double_img, _cv2 = self.generate_output(cv2, current_iteration_item)
+            double_img, _cv2 = self.generate_output(current_iteration_item)
             _cv2.imshow('Video', double_img)
+
+                        # break when 'q' is being pressed
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                self.export.close()
+                break
+
+        self.export.close()
+        cv2.destroyAllWindows()
 
     def process_frame_loop(self, next_frame_queue, process_frame_queue):
 
@@ -181,11 +194,6 @@ class Pipeline():
 
             frame_number += 1
 
-            # break when 'q' is being pressed
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.export.close()
-                break
-
     def processing_loop(self):
 
         next_frame_queue = Queue() 
@@ -199,9 +207,6 @@ class Pipeline():
         json_output_thread.start() 
         self.video_output_loop(process_frame_queue)
 
-        self.export.close()
-        cv2.destroyAllWindows()
-    
 pipeline = Pipeline()
 pipeline.processing_loop()
 
