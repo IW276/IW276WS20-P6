@@ -15,6 +15,7 @@ services:
             - "/home/p6/.Xauthority:/root/.Xauthority"
             - "/tmp/.X11-unix:/tmp/.X11-unix"
             - "./models:/IW276WS20-P6/models"
+            - "./jetson-inference/data:/jetson-inference/data"
         devices: 
             - "/dev/video0:/dev/video0"
             - "/dev/video1:/dev/video1"

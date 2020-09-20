@@ -28,6 +28,8 @@ RUN pip3 install numpy --verbose
 # install cmake and face_recognition (https://stackoverflow.com/a/55508937)
 RUN apt-get update && apt-get -y install cmake protobuf-compiler
 
+RUN mkdir data
+
 # install face_recognition (https://github.com/ageitgey/face_recognition)
 # RUN pip3 install face_recognition
 
