@@ -4,7 +4,7 @@ import cv2
 import face_recognition
 import numpy as np
 import json
-import concurrent.futures
+import asyncio
 from face_expression_recognition import TRTModel
 from realsense_frame_service import RealsenseFrameService
 from text_export import TextExport
@@ -34,7 +34,7 @@ cropped = 0
 start_time_current = time.time()
 start_time_old = time.time()
 
-def get_next_frame(process_next_frame):
+async def get_next_frame(process_next_frame):
 
     tic = time.time()
     color_frame, depth_frame, segmented_frame = realsense_frame_service.fetch_images(process_next_frame)
@@ -42,7 +42,7 @@ def get_next_frame(process_next_frame):
     print(f"Overall time for segmentation: {toc - tic:0.4f} seconds")
     return color_frame, depth_frame, segmented_frame
 
-def process_frame(color_frame, depth_frame, segmented_frame):
+async def process_frame(process_next_frame, segmented_frame, time_at_start):
 
     # face recognition
     if process_next_frame:
@@ -68,10 +68,8 @@ def process_frame(color_frame, depth_frame, segmented_frame):
         if len(face_expressions) > 0:
             print("Time Face Expression Recognition: {:.2f}".format(
                 time_after_expr_rec - time_after_face_rec))
-    
-    return color_frame, depth_frame
 
-def generate_output(_cv2, color_frame, depth_frame):
+async def generate_output(_cv2, color_frame, depth_frame):
 
 # graphical output face expression recognition
     for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions,
@@ -100,28 +98,26 @@ def generate_output(_cv2, color_frame, depth_frame):
     _cv2.namedWindow('Video', _cv2.WINDOW_AUTOSIZE)
     return np.hstack((color_frame, depth_colormap)), _cv2
 
-def append_to_output_json():
+async def append_to_output_json():
     # log when 'l' is being pressed
     # if cv2.waitKey(1) & 0xFF == ord('l'):
     for (top, right, bottom, left), face_expression in itertools.zip_longest(face_locations, face_expressions, fillvalue=''):                                                   
         export.append(frame_number, (top, left), (right, bottom), face_expression)
 
-def video_output_callback(video_output_future):
-    double_img, _cv2 = video_output_future.result()
+async def async_video_output(color_frame, depth_frame):
+    append_to_output_json()
+    double_img, _cv2 = await generate_output(cv2, color_frame, depth_frame)
     _cv2.imshow('Video', double_img)
 
-def process_frame_callback(process_frame_future, executor):
-    color_frame, depth_frame = process_frame_future.result()
-    video_output_future = executor.submit(generate_output, cv2, color_frame, depth_frame)
-    json_output_future = executor.submit(append_to_output_json)
-    video_output_future.add_done_callback(video_output_callback)
+async def async_process_frame(color_frame, depth_frame, segmented_frame, time_at_start, process_next_frame):
+    await process_frame(process_next_frame, segmented_frame, time_at_start)
+    async_video_output(color_frame, depth_frame)
 
-def next_frame_callback(next_frame_future, executor):
-    color_frame, depth_frame, segmented_frame = next_frame_future.result()
-    process_frame_future = executor.submit(process_frame, color_frame, depth_frame, segmented_frame)
-    process_frame_future.add_done_callback(process_frame_callback, executor)
+async def async_next_frame(process_next_frame, time_at_start):
+    color_frame, depth_frame, segmented_frame = await get_next_frame(process_next_frame)
+    async_process_frame(color_frame, depth_frame, segmented_frame, time_at_start, process_next_frame)
 
-with concurrent.futures.ThreadPoolExecutor() as executor:
+async def main(frame_number): 
 
     while True:
 
@@ -134,8 +130,7 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
         
         process_next_frame = frame_number % process_Nth_frame == 0
 
-        next_frame_future = executor.submit(get_next_frame)
-        next_frame_future.add_done_callback(next_frame_callback)
+        await async_next_frame(process_next_frame, time_at_start)
 
         frame_number += 1
 
@@ -144,5 +139,7 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
             export.close()
             break
 
-export.close()
-cv2.destroyAllWindows()
+    export.close()
+    cv2.destroyAllWindows()
+
+asyncio.run(main(frame_number))
