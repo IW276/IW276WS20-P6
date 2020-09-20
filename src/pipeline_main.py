@@ -54,13 +54,12 @@ class Pipeline():
                 segmented_frame, (0, 0), fx=1 / self.scale_factor, fy=1 / self.scale_factor)
             rgb_frame = _cv2.cvtColor(small_frame, _cv2.COLOR_BGR2RGB)
             self.face_locations = face_recognition.face_locations(rgb_frame)
-            current_iteration_item.face_locations = self.face_locations
             time_after_face_rec = time.time()
             print("Time Face Recognition: {:.2f}".format(
                 time_after_face_rec - current_iteration_item.time_at_start))
 
             # face expression recognition
-            face_expressions = []
+            self.face_expressions = []
             for (top, right, bottom, left) in self.face_locations:
                 # Magic Face Expression Recognition
                 face_image = segmented_frame[top * self.scale_factor:bottom 
@@ -72,11 +71,10 @@ class Pipeline():
                 face_exp = self.face_exp_rec.face_expression(face_image)
                 self.face_expressions.append(face_exp)
                 
-            current_iteration_item.face_expressions = face_expressions
             time_after_expr_rec = time.time()
             current_iteration_item.time_after_expr_rec = time_after_expr_rec
             current_iteration_item._cv2 = _cv2
-            if len(face_expressions) > 0:
+            if len(self.face_expressions) > 0:
                 print("Time Face Expression Recognition: {:.2f}".format(
                     time_after_expr_rec - time_after_face_rec))
             
@@ -87,7 +85,7 @@ class Pipeline():
 
     def generate_output(self, current_iteration_item):
 
-    # graphical output face expression recognition
+        # graphical output face expression recognition
         color_frame = current_iteration_item.color_frame
         _cv2 = current_iteration_item._cv2
 
@@ -127,6 +125,7 @@ class Pipeline():
     def json_output_loop(self, process_frame_queue):
         
         while True:
+            
             current_iteration_item = process_frame_queue.get()
             self.write_json_output(current_iteration_item)
 
@@ -207,8 +206,8 @@ class Pipeline():
                 current_iteration_item.depth_frame = depth_frame
                 current_iteration_item.segmented_frame = segmented_frame
                 current_iteration_item._cv2 = cv2
-                current_iteration_item.face_locations = self.face_locations
-                current_iteration_item.face_expressions = self.face_expressions
+                # current_iteration_item.face_locations = self.face_locations
+                # current_iteration_item.face_expressions = self.face_expressions
 
                 current_iteration_item = self.process_frame(current_iteration_item)
 
@@ -217,8 +216,8 @@ class Pipeline():
                 double_img, _cv2 = video_output_future.result()
                 _cv2.imshow('Video', double_img)
                 
-                face_locations = current_iteration_item.face_locations
-                face_expressions = current_iteration_item.face_expressions
+                # self.face_locations = current_iteration_item.face_locations
+                # self.face_expressions = current_iteration_item.face_expressions
 
                 frame_number += 1
 

@@ -5,8 +5,6 @@ class CurrentIterationItem:
     depth_frame = None
     segmented_frame = None
     _cv2 = None
-    face_locations = []
-    face_expressions = []
 
     def __init__(self, start_time_current, start_time_old, time_at_start, process_next_frame, frame_number):
         self.start_time_current = start_time_current
