@@ -19,7 +19,6 @@ class CurrentIterationItem:
     face_locations = []
     face_expressions = []
 
-
     def __init__(self, start_time_current, start_time_old, time_at_start, process_next_frame, frame_number):
         self.start_time_current = start_time_current
         self.start_time_old = start_time_old
@@ -89,7 +88,9 @@ class Pipeline():
             if len(face_expressions) > 0:
                 print("Time Face Expression Recognition: {:.2f}".format(
                     time_after_expr_rec - time_after_face_rec))
-        
+        else:
+            cv2.waitKey(33)
+            
         return current_iteration_item
 
     def generate_output(self, _cv2, current_iteration_item):
@@ -152,7 +153,6 @@ class Pipeline():
 
             current_iteration_item = next_frame_queue.get()
             current_iteration_item = self.process_frame(current_iteration_item)
-
             process_frame_queue.put(current_iteration_item)
 
     def next_frame_loop(self, next_frame_queue):
