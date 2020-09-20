@@ -59,7 +59,7 @@ class Pipeline():
     def process_frame(self, current_iteration_item):
         
         _cv2 = current_iteration_item._cv2
-        
+
         # face recognition
         if current_iteration_item.process_next_frame:
             segmented_frame = current_iteration_item.segmented_frame
@@ -74,16 +74,16 @@ class Pipeline():
 
             # face expression recognition
             face_expressions = []
-            for (top, right, bottom, left) in face_locations:
-                # Magic Face Expression Recognition
-                face_image = segmented_frame[top * self.scale_factor:bottom 
-                                                * self.scale_factor, left 
-                                                * self.scale_factor:right 
-                                                * self.scale_factor]
+            # for (top, right, bottom, left) in face_locations:
+            #     # Magic Face Expression Recognition
+            #     face_image = segmented_frame[top * self.scale_factor:bottom 
+            #                                     * self.scale_factor, left 
+            #                                     * self.scale_factor:right 
+            #                                     * self.scale_factor]
 
-                face_image = _cv2.cvtColor(face_image, _cv2.COLOR_BGR2RGB)
-                face_exp = self.face_exp_rec.face_expression(face_image)
-                face_expressions.append(face_exp)
+            #     face_image = _cv2.cvtColor(face_image, _cv2.COLOR_BGR2RGB)
+            #     face_exp = self.face_exp_rec.face_expression(face_image)
+            #     face_expressions.append(face_exp)
                 
             current_iteration_item.face_expressions = face_expressions
             time_after_expr_rec = time.time()
