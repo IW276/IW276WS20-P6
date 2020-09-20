@@ -16,6 +16,9 @@ class CurrentIterationItem:
     color_frame = None
     depth_frame = None
     segmented_frame = None
+    face_locations = []
+    face_expressions = []
+
 
     def __init__(self, start_time_current, start_time_old, time_at_start, process_next_frame, frame_number):
         self.start_time_current = start_time_current
@@ -44,8 +47,6 @@ class Pipeline():
 
     # init some variables
     export = TextExport()
-    # face_locations = []
-    # face_expressions = []
 
     def get_next_frame(self, current_iteration_item):
 
@@ -64,6 +65,7 @@ class Pipeline():
                 segmented_frame, (0, 0), fx=1 / self.scale_factor, fy=1 / self.scale_factor)
             rgb_frame = cv2.cvtColor(small_frame, cv2.COLOR_BGR2RGB)
             face_locations = face_recognition.face_locations(rgb_frame)
+            current_iteration_item.face_locations = face_locations
             time_after_face_rec = time.time()
             print("Time Face Recognition: {:.2f}".format(
                 time_after_face_rec - current_iteration_item.time_at_start))
@@ -80,7 +82,8 @@ class Pipeline():
                 face_image = cv2.cvtColor(face_image, cv2.COLOR_BGR2RGB)
                 face_exp = self.face_exp_rec.face_expression(face_image)
                 face_expressions.append(face_exp)
-
+                
+            current_iteration_item.face_expressions = face_expressions
             time_after_expr_rec = time.time()
             current_iteration_item.time_after_expr_rec = time_after_expr_rec
             if len(face_expressions) > 0:
@@ -92,7 +95,8 @@ class Pipeline():
     def generate_output(self, _cv2, current_iteration_item):
 
     # graphical output face expression recognition
-        for (top, right, bottom, left), face_expression in itertools.zip_longest(self.face_locations, self.face_expressions,
+        for (top, right, bottom, left), face_expression in itertools.zip_longest(current_iteration_item.face_locations, 
+                                                                                current_iteration_item.face_expressions,
                                                                                 fillvalue=''):
             color_frame = current_iteration_item.color_frame
             top *= self.scale_factor
@@ -122,15 +126,23 @@ class Pipeline():
     def append_to_output_json(self, current_iteration_item):
         # log when 'l' is being pressed
         # if cv2.waitKey(1) & 0xFF == ord('l'):
-        for (top, right, bottom, left), face_expression in itertools.zip_longest(self.face_locations, self.face_expressions, fillvalue=''):                                                   
+        for (top, right, bottom, left), face_expression in itertools.zip_longest(current_iteration_item.face_locations, 
+                                                                                current_iteration_item.face_expressions, 
+                                                                                fillvalue=''):      
+
             self.export.append(current_iteration_item.frame_number, (top, left), (right, bottom), face_expression)
+
+    def json_output_loop(self, process_frame_queue):
+        
+        while True:
+            current_iteration_item = process_frame_queue.get()
+            self.append_to_output_json(current_iteration_item)
 
     def video_output_loop(self, process_frame_queue):
 
         while True:
 
             current_iteration_item = process_frame_queue.get()
-            self.append_to_output_json(current_iteration_item)
             double_img, _cv2 = self.generate_output(cv2, current_iteration_item)
             _cv2.imshow('Video', double_img)
 
@@ -174,9 +186,11 @@ class Pipeline():
         process_frame_queue = Queue()
         next_frame_thread = Thread(target = self.next_frame_loop, args =(next_frame_queue)) 
         process_frame_thread = Thread(target = self.process_frame_loop, args =(next_frame_queue, process_frame_queue))
+        json_output_thread = Thread(target = self.json_output_loop, args =(process_frame_queue))
    
         next_frame_thread.start() 
         process_frame_thread.start() 
+        json_output_thread.start() 
         self.video_output_loop(process_frame_queue)
 
         # break when 'q' is being pressed
@@ -186,8 +200,8 @@ class Pipeline():
 
         self.export.close()
         cv2.destroyAllWindows()
-
-def main(): 
     
-    pipeline = Pipeline()
-    pipeline.processing_loop()
+pipeline = Pipeline()
+pipeline.processing_loop()
+
+
