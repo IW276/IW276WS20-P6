@@ -56,6 +56,16 @@ RUN mv /librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/pyt
 
 RUN apt-get update && apt-get install -qqy x11-apps xauth vim
 
+WORKDIR /
+RUN git clone --recursive https://github.com/dusty-nv/jetson-inference
+WORKDIR /jetson-inference
+RUN mkdir build
+WORKDIR build
+RUN cmake ../
+RUN make -j4
+RUN make install
+RUN ldconfig
+
 RUN mkdir IW276WS20-P6
 WORKDIR /IW276WS20-P6
 COPY ./src/ .

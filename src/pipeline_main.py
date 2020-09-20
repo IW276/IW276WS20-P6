@@ -125,7 +125,7 @@ class Pipeline():
     def json_output_loop(self, process_frame_queue):
         
         while True:
-            
+
             current_iteration_item = process_frame_queue.get()
             self.write_json_output(current_iteration_item)
 
@@ -244,6 +244,6 @@ class Pipeline():
         self.video_output_loop(process_frame_queue)
 
 pipeline = Pipeline()
-pipeline.process()
+pipeline.process_with_threads()
 
 
