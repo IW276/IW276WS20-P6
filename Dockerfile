@@ -29,38 +29,36 @@ RUN pip3 install numpy --verbose
 RUN apt-get update && apt-get -y install cmake protobuf-compiler
 
 # install face_recognition (https://github.com/ageitgey/face_recognition)
-RUN pip3 install face_recognition
+# RUN pip3 install face_recognition
 
-# install yaml
-RUN pip3 install pyyaml
 
-# install torch2trt (https://github.com/NVIDIA-AI-IOT/torch2trt#setup)
-RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt
-WORKDIR /torch2trt
-RUN python3 setup.py install
+# # install torch2trt (https://github.com/NVIDIA-AI-IOT/torch2trt#setup)
+# RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt
+# WORKDIR /torch2trt
+# RUN python3 setup.py install
 
 # clone old project and run pipeline
-WORKDIR /
+# WORKDIR /
 
-RUN apt-get update && apt-get -y install xorg-dev libglu1-mesa-dev libusb-1.0-0-dev
+# RUN apt-get update && apt-get -y install xorg-dev libglu1-mesa-dev libusb-1.0-0-dev
 
-RUN git clone https://github.com/IntelRealSense/librealsense
-RUN mkdir librealsense/build
-WORKDIR /librealsense/build
-RUN cmake ../ -DBUILD_PYTHON_BINDINGS=bool:true
-RUN make -j4 VERBOSE=1 
-RUN make install
+# RUN git clone https://github.com/IntelRealSense/librealsense
+# RUN mkdir librealsense/build
+# WORKDIR /librealsense/build
+# RUN cmake ../ -DBUILD_PYTHON_BINDINGS=bool:true
+# RUN make -j4 VERBOSE=1 
+# RUN make install
 
-RUN mv /usr/local/lib/python2.7/pyrealsense2 /usr/local/lib/python3.6/dist-packages
-RUN mv /librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
+# RUN mv /usr/local/lib/python2.7/pyrealsense2 /usr/local/lib/python3.6/dist-packages
+# RUN mv /librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
 
-RUN apt-get update && apt-get install -qqy x11-apps xauth vim
+# RUN apt-get update && apt-get install -qqy x11-apps xauth vim
 
-RUN mkdir IW276WS20-P6
-WORKDIR /IW276WS20-P6
-COPY ./src/ .
-WORKDIR /IW276WS20-P6
-RUN mkdir logs
+# RUN mkdir IW276WS20-P6
+# WORKDIR /IW276WS20-P6
+# COPY ./src/ .
+# WORKDIR /IW276WS20-P6
+# RUN mkdir logs
 
 ENTRYPOINT /bin/bash
 
