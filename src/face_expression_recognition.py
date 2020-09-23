@@ -33,19 +33,19 @@ class TRTModel:
         self.label_map = dict((v, k) for k, v in self.dictionary.items())
         self.size = size
 
-    def image_loader(self, image):
+    def __image_loader(self, image):
         loader = transforms.Compose([transforms.ToTensor()])
         image = loader(image).float()
         image = image.unsqueeze(0)
         return image
 
-    def resize_image(self, image):
+    def __resize_image(self, image):
         image = cv2.resize(image, (self.size, self.size))
         return image
 
     def face_expression(self, image):
-        resized_image = self.resize_image(image)
-        tensor_image = self.image_loader(resized_image)
+        resized_image = self.__resize_image(image)
+        tensor_image = self.__image_loader(resized_image)
         tensor_image = tensor_image.cuda().contiguous()
         with torch.no_grad():
             outputs = self.model_trt(tensor_image)

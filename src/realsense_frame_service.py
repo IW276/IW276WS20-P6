@@ -30,15 +30,15 @@ class RealsenseFrameService:
         tic = time.time()
         frames = self.pipeline.wait_for_frames()
         toc = time.time()
-        # print(f"Time for waiting for next frame: {toc - tic:0.4f} seconds")
+        print(f"Time for waiting for next frame: {toc - tic:0.4f} seconds")
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
 
-            futureImages = executor.submit(self.get_images, frames)
+            futureImages = executor.submit(self.__get_images, frames)
 
             segmented_image = None
             if align:
-                futureSegmentedImages = executor.submit(self.get_segmented_image, frames)
+                futureSegmentedImages = executor.submit(self.__get_segmented_image, frames)
                 (segmented_image) = futureSegmentedImages.result()
 
             (color_image, depth_image) = futureImages.result()
@@ -46,7 +46,7 @@ class RealsenseFrameService:
 
             return color_image, depth_image, segmented_image
 
-    def get_segmented_image(self, frames):
+    def __get_segmented_image(self, frames):
 
             tic = time.time()
             aligned_frames = self.align.process(frames)
@@ -83,7 +83,7 @@ class RealsenseFrameService:
 
             return segmented_image
 
-    def get_images(self, frames):
+    def __get_images(self, frames):
 
         tic = time.time()
         frames = self.pipeline.wait_for_frames()

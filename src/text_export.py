@@ -2,7 +2,6 @@ import datetime
 import json
 import os.path
 
-
 class TextExport:
     number = 1
     data = {'expressions': []}
@@ -39,6 +38,6 @@ class TextExport:
 
 if __name__ == "__main__":
     export = TextExport()
+    # parameters -> framenumber, (top,left), (right,bottom), face_expression
     export.append(3, (11, 22), (33, 44), "happy")
     export.close()
-    # framenumber,(top,left),(right,bottom),face_expression
