@@ -178,6 +178,10 @@ class Pipeline():
             current_iteration_item.depth_frame = depth_frame
             current_iteration_item.segmented_frame = segmented_frame
             current_iteration_item._cv2 = cv2
+            # next_frame_queue.put(current_iteration_item)
+
+            current_iteration_item = next_frame_queue.get()
+            current_iteration_item = self.process_frame(current_iteration_item)
             next_frame_queue.put(current_iteration_item)
 
             frame_number += 1
@@ -206,8 +210,6 @@ class Pipeline():
                 current_iteration_item.depth_frame = depth_frame
                 current_iteration_item.segmented_frame = segmented_frame
                 current_iteration_item._cv2 = cv2
-                # current_iteration_item.face_locations = self.face_locations
-                # current_iteration_item.face_expressions = self.face_expressions
 
                 current_iteration_item = self.process_frame(current_iteration_item)
 
@@ -215,9 +217,6 @@ class Pipeline():
                 executor.submit(self.write_json_output, current_iteration_item)
                 double_img, _cv2 = video_output_future.result()
                 _cv2.imshow('Video', double_img)
-                
-                # self.face_locations = current_iteration_item.face_locations
-                # self.face_expressions = current_iteration_item.face_expressions
 
                 frame_number += 1
 
@@ -232,15 +231,15 @@ class Pipeline():
 
     def process_with_threads(self):
 
-        next_frame_queue = Queue() 
+        # next_frame_queue = Queue() 
         process_frame_queue = Queue()
-        next_frame_thread = Thread(target = self.next_frame_loop, args =(next_frame_queue,)) 
-        process_frame_thread = Thread(target = self.process_frame_loop, args =(next_frame_queue, process_frame_queue,))
-        json_output_thread = Thread(target = self.json_output_loop, args =(process_frame_queue,))
+        next_frame_thread = Thread(target = self.next_frame_loop, args =(process_frame_queue,)) 
+        # process_frame_thread = Thread(target = self.process_frame_loop, args =(next_frame_queue, process_frame_queue,))
+        # json_output_thread = Thread(target = self.json_output_loop, args =(process_frame_queue,))
    
         next_frame_thread.start() 
-        process_frame_thread.start() 
-        json_output_thread.start() 
+        # process_frame_thread.start() 
+        # json_output_thread.start() 
         self.video_output_loop(process_frame_queue)
 
 pipeline = Pipeline()
