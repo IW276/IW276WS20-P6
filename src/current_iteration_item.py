@@ -1,3 +1,7 @@
+# this class contains all relevant infomation 
+# which will be propagated through the sections of the pipeline.
+# each pipeline function takes one object as parameter and reads, writes 
+# and/or returns the modified object for following operations.
 class CurrentIterationItem:
 
     time_after_expr_rec = 0

@@ -3,6 +3,7 @@ import json
 import os.path
 
 class TextExport:
+    
     number = 1
     data = {'expressions': []}
     datetime_obj = datetime.datetime.now()

@@ -17,20 +17,19 @@ class Pipeline():
 
     # adjust the logging level here (e.g debug or info etc.)
     logging.basicConfig(level = logging.DEBUG)
-
     logger = logging.getLogger("pipeline")
 
     with open("config.json", "r") as json_config_file:
         config_properties = json.load(json_config_file)
 
-    # global variables
+    # variables from config.json
     fps_constant = int(config_properties["fpsConstant"])
     process_Nth_frame = int(config_properties["processNthFrame"])
     scale_factor = int(config_properties["scaleFactor"])
     target_width = int(config_properties["targetWidth"])
     resize_input = config_properties["useTargetSize"]
 
-    # initialize face expression recognition
+    # initialize face expression recognition and realsense pipeline
     logger.debug("Initializing Model...")
     face_exp_rec = TRTModel()
     logger.debug("Initializing Camera...")
@@ -42,9 +41,14 @@ class Pipeline():
     face_locations = []
     face_expressions = [] 
 
+    # fetch the next frames from the realsense service
+    # realsense frame service returns three differnt frames:
+    # - color frame -> rgb frame
+    # - depth frame -> depth inforamtion frame
+    # - segmented frame -> aligned and segmented background/foreground frame
     def __get_next_frame(self, current_iteration_item):
 
-        tic = time.time()
+        tic = time.time() 
         color_frame, depth_frame, segmented_frame = self.realsense_frame_service.fetch_images(current_iteration_item.process_next_frame)
         toc = time.time()
         self.logger.debug(f"Overall time for segmentation: {toc - tic:0.4f} seconds")
@@ -54,6 +58,8 @@ class Pipeline():
         current_iteration_item.segmented_frame = segmented_frame
         return current_iteration_item
 
+    # take the fetched frame and process it with face recognition 
+    # and face expression recognition 
     def __process_frame(self, current_iteration_item):
         
         _cv2 = current_iteration_item._cv2
@@ -94,9 +100,9 @@ class Pipeline():
 
         return current_iteration_item
 
+    # graphical output of processed frame 
     def __generate_output(self, current_iteration_item):
 
-        # graphical output face expression recognition
         color_frame = current_iteration_item.color_frame
         _cv2 = current_iteration_item._cv2
 
@@ -128,22 +134,17 @@ class Pipeline():
         return np.hstack((color_frame, depth_colormap)), _cv2
 
     def __write_json_output(self, current_iteration_item):
-        # log when 'l' is being pressed
-        # if cv2.waitKey(1) & 0xFF == ord('l'):
         for (top, right, bottom, left), face_expression in itertools.zip_longest(self.face_locations, self.face_expressions, fillvalue=''):      
             self.export.append(current_iteration_item.frame_number, (top, left), (right, bottom), face_expression)
 
+
     def __json_output_loop(self, process_frame_queue):
-        
         while True:
-            
             current_iteration_item = process_frame_queue.get()
             self.__write_json_output(current_iteration_item)
 
     def __video_output_loop(self, process_frame_queue):
-
         while True:
-
             current_iteration_item = process_frame_queue.get()
             double_img, _cv2 = self.__generate_output(current_iteration_item)
             _cv2.imshow('Video', double_img)
@@ -157,9 +158,7 @@ class Pipeline():
         cv2.destroyAllWindows()
 
     def __process_frame_loop(self, next_frame_queue, process_frame_queue):
-
         while True:
-
             current_iteration_item = next_frame_queue.get()
             current_iteration_item = self.__process_frame(current_iteration_item)
             process_frame_queue.put(current_iteration_item)
@@ -171,7 +170,6 @@ class Pipeline():
         start_time_old = time.time()
 
         while True:
-
             time_at_start = time.time()
             self.logger.debug("Frame: {}".format(frame_number))
             # set timers for FPS calculation
@@ -198,14 +196,12 @@ class Pipeline():
         start_time_current = time.time()
         start_time_old = time.time()
 
-        # using to to run video output and json output simultaneously
+        # using the threadpool to run video output and json output simultaneously
         with concurrent.futures.ThreadPoolExecutor() as executor:
 
             while True:
-
                 time_at_start = time.time()
-                self.logger.debug("#############################")
-                self.logger.debug("Frame: {}".format(frame_number))
+                self.logger.debug("######## Frame: {} ########".format(frame_number))
 
                 # set timers for FPS calculation
                 if frame_number % self.fps_constant == 0:
@@ -222,9 +218,11 @@ class Pipeline():
 
                 # use executor to process video output
                 video_output_future = executor.submit(self.__generate_output, current_iteration_item)
+               
                 # use executor to process json output
-                
                 executor.submit(self.__write_json_output, current_iteration_item)
+
+                # get the result from processing thread
                 double_img, _cv2 = video_output_future.result()
                 _cv2.imshow('Video', double_img)
 
@@ -259,7 +257,9 @@ class Pipeline():
         json_output_thread.start() 
         self.__video_output_loop(process_frame_queue)
 
-pipeline = Pipeline()
-pipeline.process()
+
+if __name__ == "__main__":
+    pipeline = Pipeline()
+    pipeline.process()
 
 

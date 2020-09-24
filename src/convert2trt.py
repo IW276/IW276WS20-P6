@@ -59,4 +59,6 @@ class ResNet(nn.Module):
         return cls
 
 if __name__ == "__main__":
+    print("WARNING: This script may end with an 'Segmentation Fault'")
+    print("You can ignore this exception, the script terminates its tasks correctly")
     convert()
