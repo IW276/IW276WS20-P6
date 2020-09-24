@@ -39,7 +39,9 @@ class Pipeline():
     # init some variables
     export = TextExport()
     face_locations = []
-    face_expressions = [] 
+    face_expressions = []
+
+    segmented_image = None
 
     # fetch the next frames from the realsense service
     # realsense frame service returns three differnt frames:
@@ -56,6 +58,8 @@ class Pipeline():
         current_iteration_item.color_frame = color_frame
         current_iteration_item.depth_frame = depth_frame
         current_iteration_item.segmented_frame = segmented_frame
+        if segmented_frame is not None:
+            self.segmented_image = segmented_frame
         return current_iteration_item
 
     # take the fetched frame and process it with face recognition 
@@ -105,6 +109,7 @@ class Pipeline():
 
         color_frame = current_iteration_item.color_frame
         _cv2 = current_iteration_item._cv2
+        segmented_frame = current_iteration_item.segmented_frame
 
         for (top, right, bottom, left), face_expression in itertools.zip_longest(self.face_locations, self.face_expressions, fillvalue=''):
             self.logger.debug((top, right, bottom, left))
@@ -131,7 +136,7 @@ class Pipeline():
         # display resulting image
         depth_colormap = _cv2.applyColorMap(_cv2.convertScaleAbs(current_iteration_item.depth_frame, alpha=0.03), _cv2.COLORMAP_JET)
         _cv2.namedWindow('Video', _cv2.WINDOW_AUTOSIZE)
-        return np.hstack((color_frame, depth_colormap)), _cv2
+        return np.hstack((color_frame, depth_colormap, self.segmented_image)), _cv2
 
     def __write_json_output(self, current_iteration_item):
         for (top, right, bottom, left), face_expression in itertools.zip_longest(self.face_locations, self.face_expressions, fillvalue=''):      
