@@ -39,18 +39,20 @@ RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt
 WORKDIR /torch2trt
 RUN python3 setup.py install
 
-# clone old project and run pipeline
 WORKDIR /
 
 RUN apt-get update && apt-get -y install xorg-dev libglu1-mesa-dev libusb-1.0-0-dev
 
+# https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md
 RUN git clone https://github.com/IntelRealSense/librealsense
 RUN mkdir librealsense/build
 WORKDIR /librealsense/build
-RUN cmake ../ -DBUILD_PYTHON_BINDINGS=bool:true
+RUN cmake ../ -DBUILD_PYTHON_BINDINGS=bool:true -DCMAKE_BUILD_TYPE=release -DBUILD_WITH_CUDA:bool=true
 RUN make -j4 VERBOSE=1 
 RUN make install
 
+# installation copies files to wrong location
+# correct the location of some files 
 RUN mv /usr/local/lib/python2.7/pyrealsense2 /usr/local/lib/python3.6/dist-packages
 RUN mv /librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
 
@@ -63,26 +65,3 @@ WORKDIR /IW276WS20-P6
 RUN mkdir logs
 
 ENTRYPOINT /bin/bash
-
-# RUN python3 -c "import pyrealsense2"
-# RUN git clone https://github.com/IW276/IW276WS20-P6.git
-
-# WORKDIR /IW276WS20-P6
-# RUN mv resources/pyrealsense2/ src/
-
-# WORKDIR /IW276WS20-P6/src
-# RUN python3 -c "import pyrealsense2"
-# RUN python3 realsenseVideo.py
-
-# RUN mkdir /IW276WS20-P6/models
-
-# WORKDIR /IW276WS20-P6/pretrained-models
-# RUN 7z x resnet50.224.pth.7z -o../models
-
-# WORKDIR /IW276WS20-P6/models
-# RUN ls
-
-# WORKDIR /IW276WS20-P6/src
-# RUN python3 convert2trt.py resnet50 ../models/resnet50.224.pth ../models/resnet50.224.trt.pth
-# RUN python3 pipeline_main.py video.mp4
-
