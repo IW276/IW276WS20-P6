@@ -86,7 +86,7 @@ Some dependencies are not available via pip. The following sections guide the in
 #### **torch2trt**
 
 torch2trt is needed for the conversion of the pytorch model to the tensorRT model and the execution of the converted model.
-torch2trt at this stage is not avaiable via pip.
+torch2trt at this stage is not available via pip.
 You need to clone the [repository](https://github.com/NVIDIA-AI-IOT/torch2trt/) and follow the [setup](https://github.com/NVIDIA-AI-IOT/torch2trt/#setup).
 
 Setup:
