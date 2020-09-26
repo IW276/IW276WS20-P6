@@ -57,11 +57,11 @@ RUN mv /usr/local/lib/python2.7/pyrealsense2 /usr/local/lib/python3.6/dist-packa
 RUN mv /lib/librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
 
 # copy resources from the folder
-RUN mkdir app/IW276WS20-P6
+RUN mkdir app/ && cd app && mkdir IW276WS20-P6/
 WORKDIR /app/IW276WS20-P6
-COPY ./src/ .
+COPY ./src/ ./src/
 COPY ./pretrained-models ./pretrained-models 
-RUN mkdir logs && mdkir models
+RUN mkdir logs && mkdir models
 
 # unzip model
 WORKDIR /app/IW276WS20-P6/pretrained-models
