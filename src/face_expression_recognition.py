@@ -24,14 +24,13 @@ class TRTModel:
         "Neutral": 0,
     }
 
-    def __init__(self, size=224):
+    def __init__(self, trt_model):
         self.model_trt = TRTModule()
-        PATH = './models/resnet50.224.trt.pth'
-        self.model_trt.load_state_dict(torch.load(PATH))
+        self.model_trt.load_state_dict(torch.load(trt_model))
         self.model_trt.eval().cuda()
 
         self.label_map = dict((v, k) for k, v in self.dictionary.items())
-        self.size = size
+        self.size = 224
 
     def __image_loader(self, image):
         loader = transforms.Compose([transforms.ToTensor()])

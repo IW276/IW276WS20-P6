@@ -29,9 +29,6 @@ class Pipeline():
     target_width = int(config_properties["targetWidth"])
     resize_input = config_properties["useTargetSize"]
 
-    # initialize face expression recognition and realsense pipeline instance
-    logger.debug("Initializing Model...")
-    face_exp_rec = TRTModel()
     logger.debug("Initializing Camera...")
     realsense_frame_service = RealsenseFrameService()
     logger.debug("Initialization done!")
@@ -45,6 +42,12 @@ class Pipeline():
 
     # variable to output segmented image 
     segmented_image = None
+
+    def __init__(self, trt_model):
+
+        # initialize face expression recognition and realsense pipeline instance
+        self.logger.debug("Initializing Model...")
+        self.face_exp_rec = TRTModel(trt_model)
 
     # fetch the next frames from the realsense service
     # realsense frame service returns three differnt frames:
@@ -269,7 +272,14 @@ class Pipeline():
         self.__video_output_loop(process_frame_queue)
 
 if __name__ == "__main__":
-    pipeline = Pipeline()
+
+    if len(sys.argv) < 2:
+        print("usage: python3 pipeline.py <trt-model>")
+        sys.exit(-1)
+
+    TRT_MODEL = sys.argv[1]
+
+    pipeline = Pipeline(TRT_MODEL)
     pipeline.process()
 
 

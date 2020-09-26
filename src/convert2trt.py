@@ -18,7 +18,7 @@ __all__ = ['ResNet']
 
 def convert():
     if len(sys.argv) < 4:
-        print("usage: python convert2trt.py <mode> <source> <target>")
+        print("usage: python3 convert2trt.py <mode> <source> <target>")
         sys.exit(-1)
 
     MODE = sys.argv[1]

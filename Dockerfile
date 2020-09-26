@@ -65,4 +65,15 @@ COPY ./src/ .
 WORKDIR /IW276WS20-P6
 RUN mkdir logs
 
-ENTRYPOINT /bin/bash
+WORKDIR /app/IW276WS20-P6/pretrained-models
+RUN 7z x resnet50.224.pth.7z
+
+WORKDIR /app/IW276WS20-P6/src
+
+# convert2trt script always quits with an segmentation fault
+# be carefull with the log output to spot errors beside the segmentation fault
+RUN python3 convert2trt.py resnet50 ../pretrained-models/resnet50.224.pth ../models/resnet50.224.trt.pth; exit 0
+
+CMD python3 pipeline.py ../models/resnet50.224.trt.pth
+
+# ENTRYPOINT /bin/bash

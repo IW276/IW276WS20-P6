@@ -48,7 +48,6 @@ class RealsenseFrameService:
 
             (color_image, depth_image) = futureImages.result()
 
-
             return color_image, depth_image, segmented_image
 
     def __get_segmented_image(self, frames):
@@ -114,7 +113,6 @@ class RealsenseFrameService:
             return
 
         return color_image, depth_image
-
 
     def stop_pipeline(self):
         self.pipeline.stop()
