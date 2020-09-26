@@ -73,7 +73,6 @@ class RealsenseFrameService:
             toc = time.time()
             self.logger.debug(f"Overall time for array creation: {toc - tic:0.4f} seconds")
 
-            # Remove background - Set pixels further than clipping_distance to grey
 
             tic = time.time()
             depth_image_3d = np.dstack(
@@ -81,6 +80,7 @@ class RealsenseFrameService:
             toc = time.time()
             self.logger.debug(f"Time for stacking: {toc - tic:0.4f} seconds")
 
+            # Remove background - Set pixels further than clipping_distance to grey
             tic = time.time()
             segmented_image = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), self.grey_color, color_image)
             toc = time.time()

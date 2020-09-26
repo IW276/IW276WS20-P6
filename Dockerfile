@@ -31,22 +31,22 @@ RUN apt-get update && apt-get -y install cmake protobuf-compiler
 # install face_recognition (https://github.com/ageitgey/face_recognition)
 RUN pip3 install face_recognition
 
-# install yaml
-RUN pip3 install pyyaml
+WORKDIR /lib
 
 # install torch2trt (https://github.com/NVIDIA-AI-IOT/torch2trt#setup)
 RUN git clone https://github.com/NVIDIA-AI-IOT/torch2trt
-WORKDIR /torch2trt
+WORKDIR /lib/torch2trt
 RUN python3 setup.py install
 
-WORKDIR /
-
+# packages for camera connection
 RUN apt-get update && apt-get -y install xorg-dev libglu1-mesa-dev libusb-1.0-0-dev
+
+WORKDIR /lib 
 
 # https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md
 RUN git clone https://github.com/IntelRealSense/librealsense
 RUN mkdir librealsense/build
-WORKDIR /librealsense/build
+WORKDIR /lib/librealsense/build
 RUN cmake ../ -DBUILD_PYTHON_BINDINGS=bool:true -DCMAKE_BUILD_TYPE=release -DBUILD_WITH_CUDA:bool=true
 RUN make -j4 VERBOSE=1 
 RUN make install
@@ -54,12 +54,13 @@ RUN make install
 # installation copies files to wrong location
 # correct the location of some files 
 RUN mv /usr/local/lib/python2.7/pyrealsense2 /usr/local/lib/python3.6/dist-packages
-RUN mv /librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
+RUN mv /lib/librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
 
+# packages for display output
 RUN apt-get update && apt-get install -qqy x11-apps xauth vim
 
-RUN mkdir IW276WS20-P6
-WORKDIR /IW276WS20-P6
+RUN mkdir app/IW276WS20-P6
+WORKDIR /app/IW276WS20-P6
 COPY ./src/ .
 WORKDIR /IW276WS20-P6
 RUN mkdir logs

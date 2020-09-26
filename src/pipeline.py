@@ -29,18 +29,21 @@ class Pipeline():
     target_width = int(config_properties["targetWidth"])
     resize_input = config_properties["useTargetSize"]
 
-    # initialize face expression recognition and realsense pipeline
+    # initialize face expression recognition and realsense pipeline instance
     logger.debug("Initializing Model...")
     face_exp_rec = TRTModel()
     logger.debug("Initializing Camera...")
     realsense_frame_service = RealsenseFrameService()
-    logger.debug("Initialization done")
+    logger.debug("Initialization done!")
 
-    # init some variables
+    # init json text export instance
     export = TextExport()
+
+    # safe face recognition locations and face expression for the last evaluated value
     face_locations = []
     face_expressions = []
 
+    # variable to output segmented image 
     segmented_image = None
 
     # fetch the next frames from the realsense service
@@ -109,7 +112,6 @@ class Pipeline():
 
         color_frame = current_iteration_item.color_frame
         _cv2 = current_iteration_item._cv2
-        segmented_frame = current_iteration_item.segmented_frame
 
         for (top, right, bottom, left), face_expression in itertools.zip_longest(self.face_locations, self.face_expressions, fillvalue=''):
             self.logger.debug((top, right, bottom, left))
@@ -138,16 +140,18 @@ class Pipeline():
         _cv2.namedWindow('Video', _cv2.WINDOW_AUTOSIZE)
         return np.hstack((color_frame, depth_colormap, self.segmented_image)), _cv2
 
+    # function to append current pipeline iteration information to the json output
     def __write_json_output(self, current_iteration_item):
         for (top, right, bottom, left), face_expression in itertools.zip_longest(self.face_locations, self.face_expressions, fillvalue=''):      
             self.export.append(current_iteration_item.frame_number, (top, left), (right, bottom), face_expression)
 
-
+    # json output loop for multithread approach
     def __json_output_loop(self, process_frame_queue):
         while True:
             current_iteration_item = process_frame_queue.get()
             self.__write_json_output(current_iteration_item)
 
+    # video output loop for multithread approach
     def __video_output_loop(self, process_frame_queue):
         while True:
             current_iteration_item = process_frame_queue.get()
@@ -162,12 +166,14 @@ class Pipeline():
         self.export.close()
         cv2.destroyAllWindows()
 
+    # frame processing loop for multithread approach
     def __process_frame_loop(self, next_frame_queue, process_frame_queue):
         while True:
             current_iteration_item = next_frame_queue.get()
             current_iteration_item = self.__process_frame(current_iteration_item)
             process_frame_queue.put(current_iteration_item)
 
+    # next frame loop for multithread approach
     def __next_frame_loop(self, next_frame_queue):
 
         frame_number = 0
@@ -245,7 +251,7 @@ class Pipeline():
     # !caution! multhreading approach does not work as intended
     # starvation of threads leads to problems with processing the pipeline
     # most of the time the main thread does not get scheduled or dies, which results in no video output
-    # not deterministic, if the video output succeeds  
+    # not deterministic, if the video output succeeds
     def process_with_threads(self):
 
         self.logger.info("Starting the Pipline!")
@@ -261,7 +267,6 @@ class Pipeline():
         process_frame_thread.start() 
         json_output_thread.start() 
         self.__video_output_loop(process_frame_queue)
-
 
 if __name__ == "__main__":
     pipeline = Pipeline()
