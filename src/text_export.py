@@ -8,7 +8,7 @@ class TextExport:
     data = {'expressions': []}
     datetime_obj = datetime.datetime.now()
     timestamp = datetime_obj.strftime("%d%b%Y%H%M")
-    output_file_path = './logs/output' + str(timestamp) + '.json'
+    output_file_path = '../logs/output' + str(timestamp) + '.json'
 
     def __init__(self):
         if os.path.isfile(self.output_file_path):
