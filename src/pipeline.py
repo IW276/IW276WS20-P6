@@ -281,6 +281,8 @@ class Pipeline():
 
                 current_iteration_item = next_frame_queue.get()
 
+                current_iteration_item = self.__process_frame(current_iteration_item)
+
                 # use executor to process video output
                 video_output_future = executor.submit(self.__generate_video_output, current_iteration_item)
 
