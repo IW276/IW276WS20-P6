@@ -47,7 +47,6 @@ class Pipeline():
     pipeline_executor = ThreadPoolExecutor()
     processed_frame_queue = Queue()
 
-
     # fetch the next frames from the realsense service
     # realsense frame service returns three differnt frames:
     # - color frame -> rgb frame
@@ -137,7 +136,7 @@ class Pipeline():
         depth_colormap = _cv2.applyColorMap(_cv2.convertScaleAbs(current_iteration_item.depth_frame, alpha=0.03),
                                             _cv2.COLORMAP_JET)
         _cv2.namedWindow('Video', _cv2.WINDOW_AUTOSIZE)
-        return np.hstack((color_frame, depth_colormap), _cv2
+        return np.hstack((color_frame, depth_colormap)), _cv2
 
     # function to append current pipeline iteration information to the json output
     def __write_json_output(self, current_iteration_item):
@@ -157,11 +156,12 @@ class Pipeline():
     # frame processing loop for multithread approach
     def __process_frame_callback(self, future):
         processing_result = future.result()
-        self.pipeline_executor.submit(self.__generate_output, future.result()).add_done_callback(self.__generate_output_callback)
+        self.pipeline_executor.submit(self.__generate_output, future.result()).add_done_callback(
+            self.__generate_output_callback)
         # self.pipeline_executor.submit(self.__write_json_output, future.result())
 
     # next frame loop for multithread approach
-    def __next_frame_loop(self):
+    def __next_frame_loop(self, next_frame_queue):
 
         frame_number = 0
         start_time_current = time.time()
@@ -181,18 +181,10 @@ class Pipeline():
             current_iteration_item = self.__get_next_frame(current_iteration_item)
 
             current_iteration_item._cv2 = cv2
-            self.pipeline_executor.submit(self.__process_frame, current_iteration_item).add_done_callback(
-                self.__process_frame_callback)
+
+            next_frame_queue.put(current_iteration_item)
 
             frame_number += 1
-
-            # break when 'q' is being pressed
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                self.export.close()
-                break
-
-        self.export.close()
-        cv2.destroyAllWindows()
 
     # process the pipline without multithreading approach
     def process(self):
@@ -255,13 +247,38 @@ class Pipeline():
         self.logger.info("Starting the Pipline!")
         self.logger.info("Processing the frames by multithreading the stages.")
 
-        video_output_thread = Thread(target = self.__video_output_loop)
-        video_output_thread.start()
+        next_frame_queue = Queue()
 
-        self.__next_frame_loop()
+        next_frame_thread = Thread(target=self.__next_frame_loop, args=(next_frame_queue,))
+        next_frame_thread.start()
+
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+
+            while True:
+
+                current_iteration_item = next_frame_queue.get()
+
+                current_iteration_item = self.__process_frame(current_iteration_item)
+
+                # use executor to process video output
+                video_output_future = executor.submit(self.__generate_output, current_iteration_item)
+
+                # use executor to process json output
+                executor.submit(self.__write_json_output, current_iteration_item)
+
+                # get the result from processing thread
+                double_img, _cv2 = video_output_future.result()
+                _cv2.imshow('Video', double_img)
+
+                # break when 'q' is being pressed
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    self.export.close()
+                    break
+
+            self.export.close()
+            cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-
     pipeline = Pipeline()
     pipeline.process_with_futures()
