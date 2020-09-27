@@ -244,7 +244,7 @@ class Pipeline():
     # not deterministic, if the video output succeeds
     def process_with_futures(self):
 
-        self.logger.info("Starting the Pipline!")
+        self.logger.info("Starting the Pipeline!")
         self.logger.info("Processing the frames by multithreading the stages.")
 
         next_frame_queue = Queue()
@@ -268,7 +268,7 @@ class Pipeline():
 
                 # get the result from processing thread
                 double_img, _cv2 = video_output_future.result()
-                _cv2.imshow('Video', double_img)
+                # _cv2.imshow('Video', double_img)
 
                 # break when 'q' is being pressed
                 if cv2.waitKey(1) & 0xFF == ord('q'):

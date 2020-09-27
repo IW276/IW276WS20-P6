@@ -12,6 +12,7 @@ from realsense_frame_service import RealsenseFrameService
 from text_export import TextExport
 from current_iteration_item import CurrentIterationItem
 import logging
+import sys
 
 class Pipeline():
 
@@ -111,7 +112,7 @@ class Pipeline():
         return current_iteration_item
 
     # graphical output of processed frame 
-    def __generate_output(self, current_iteration_item):
+    def __generate_video_output(self, current_iteration_item):
 
         color_frame = current_iteration_item.color_frame
         _cv2 = current_iteration_item._cv2
@@ -158,7 +159,7 @@ class Pipeline():
     def __video_output_loop(self, process_frame_queue):
         while True:
             current_iteration_item = process_frame_queue.get()
-            double_img, _cv2 = self.__generate_output(current_iteration_item)
+            double_img, _cv2 = self.__generate_video_output(current_iteration_item)
             _cv2.imshow('Video', double_img)
 
             # break when 'q' is being pressed
@@ -231,7 +232,7 @@ class Pipeline():
                 current_iteration_item = self.__process_frame(current_iteration_item)
 
                 # use executor to process video output
-                video_output_future = executor.submit(self.__generate_output, current_iteration_item)
+                video_output_future = executor.submit(self.__generate_video_output, current_iteration_item)
                
                 # use executor to process json output
                 executor.submit(self.__write_json_output, current_iteration_item)
@@ -241,14 +242,6 @@ class Pipeline():
                 _cv2.imshow('Video', double_img)
 
                 frame_number += 1
-
-                # break when 'q' is being pressed
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    self.export.close()
-                    break
-
-            self.export.close()
-            cv2.destroyAllWindows()
 
     # process the pipline with multithreading approach
     # !caution! multhreading approach does not work as intended
@@ -271,6 +264,41 @@ class Pipeline():
         json_output_thread.start() 
         self.__video_output_loop(process_frame_queue)
 
+    def process_with_fetch_thread(self):
+
+        self.logger.info("Starting the Pipline!")
+        self.logger.info("Processing the frames partly multithreaded.")
+
+        next_frame_queue = Queue(30)
+
+        next_frame_thread = Thread(target=self.__next_frame_loop, args=(next_frame_queue,))
+        next_frame_thread.start()
+
+        # using the threadpool to run video output and json output simultaneously
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+
+            while True:
+
+                current_iteration_item = next_frame_queue.get()
+
+                # use executor to process video output
+                video_output_future = executor.submit(self.__generate_video_output, current_iteration_item)
+
+                # use executor to process json output
+                executor.submit(self.__write_json_output, current_iteration_item)
+
+                # get the result from processing thread
+                double_img, _cv2 = video_output_future.result()
+                _cv2.imshow('Video', double_img)
+
+                # break when 'q' is being pressed
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    self.export.close()
+                    break
+
+            self.export.close()
+            cv2.destroyAllWindows()
+
 if __name__ == "__main__":
 
     if len(sys.argv) < 2:
@@ -280,6 +308,6 @@ if __name__ == "__main__":
     TRT_MODEL = sys.argv[1]
 
     pipeline = Pipeline(TRT_MODEL)
-    pipeline.process()
+    pipeline.process_with_fetch_thread()
 
 
