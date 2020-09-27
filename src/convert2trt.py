@@ -9,6 +9,7 @@ from torchvision import datasets, models, transforms
 import cv2
 import numpy as np
 import sys
+import os.path
 
 # converts resnet model to TRT model
 # usage: python convert2trt.py <mode> <source> <target>
@@ -25,6 +26,11 @@ def convert():
     resnet_model = ResNet(MODE)
     PATH = sys.argv[2]
     TARGET = sys.argv[3]
+
+    if (os.path.isfile(TARGET)):
+        print(f"File at {TARGET} already exists! Stopping the conversion.")
+        sys.exit(-1)
+
     checkpoint = torch.load(PATH)
     resnet_model.load_state_dict(checkpoint['model_state_dict'])
     resnet_model.cuda().eval()

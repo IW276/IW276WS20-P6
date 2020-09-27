@@ -45,6 +45,8 @@ class Pipeline():
     segmented_image = None
 
     pipeline_executor = ThreadPoolExecutor()
+    processed_frame_queue = Queue()
+
 
     # fetch the next frames from the realsense service
     # realsense frame service returns three differnt frames:
@@ -135,7 +137,7 @@ class Pipeline():
         depth_colormap = _cv2.applyColorMap(_cv2.convertScaleAbs(current_iteration_item.depth_frame, alpha=0.03),
                                             _cv2.COLORMAP_JET)
         _cv2.namedWindow('Video', _cv2.WINDOW_AUTOSIZE)
-        return np.hstack((color_frame, depth_colormap, self.segmented_image)), _cv2
+        return np.hstack((color_frame, depth_colormap), _cv2
 
     # function to append current pipeline iteration information to the json output
     def __write_json_output(self, current_iteration_item):
@@ -144,15 +146,19 @@ class Pipeline():
             self.export.append(current_iteration_item.frame_number, (top, left), (right, bottom), face_expression)
 
     # video output loop for multithread approach
-    def __output_callback(self, future):
-        double_img, _cv2 = future.result()
-        _cv2.imshow('Video', double_img)
+    def __video_output_loop(self):
+        while True:
+            (double_img, _cv2) = self.processed_frame_queue.get()
+            _cv2.imshow('Video', double_img)
+
+    def __generate_output_callback(self, future):
+        self.processed_frame_queue.put((future.result()))
 
     # frame processing loop for multithread approach
     def __process_frame_callback(self, future):
         processing_result = future.result()
-        self.pipeline_executor.submit(self.__generate_output, future.result()).add_done_callback(self.__output_callback)
-        self.pipeline_executor.submit(self.__write_json_output, future.result())
+        self.pipeline_executor.submit(self.__generate_output, future.result()).add_done_callback(self.__generate_output_callback)
+        # self.pipeline_executor.submit(self.__write_json_output, future.result())
 
     # next frame loop for multithread approach
     def __next_frame_loop(self):
@@ -248,6 +254,9 @@ class Pipeline():
 
         self.logger.info("Starting the Pipline!")
         self.logger.info("Processing the frames by multithreading the stages.")
+
+        video_output_thread = Thread(target = self.__video_output_loop)
+        video_output_thread.start()
 
         self.__next_frame_loop()
 
