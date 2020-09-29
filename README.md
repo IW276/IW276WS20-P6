@@ -6,8 +6,7 @@
 Short introduction to project assigment.
 
 <p align="center">
-  Screenshot / GIF <br />
-  Link to Demo Video
+  <img src="./demo.gif" />
 </p>
 
 > This work was done by Christian Braun, Fabian Wenzel and Bernardo Abreu Figueiredo during the IW276 Autonome Systeme Labor at the Karlsruhe University of Applied Sciences (Hochschule Karlruhe - Technik und Wirtschaft) in WS 2020 / 2021. 
