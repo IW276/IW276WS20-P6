@@ -18,12 +18,14 @@ Short introduction to project assigment.
   - [Requirements](#requirements)
   - [Prerequisites](#prerequisites)
     - [Docker Execution Prerequisites](#docker-execution-prerequisites)
+      - [Source List and GPG Files in `resource` folder](#source-list-and-gpg-files-in-resource-folder)
     - [Nano Execution Prerequisites](#nano-execution-prerequisites)
       - [**torch2trt**](#torch2trt)
       - [**pyrealsense2 (librealsense)**](#pyrealsense2-librealsense)
   - [Pre-trained models <a name="pre-trained-models"></a>](#pre-trained-models-)
   - [Running](#running)
   - [Docker](#docker)
+    - [Optional steps (for development):](#optional-steps-for-development)
   - [Acknowledgments](#acknowledgments)
   - [Contact](#contact)
 
@@ -57,9 +59,20 @@ git clone git@github.com:IW276/IW276WS20-P6.git
 ```
 
 2. Move inside the directory
+
 ```
 cd IW276WS20-P6
 ```
+
+3. Enable the jetson_clocks (to increase install/execution performance)  
+
+```
+sudo jetson_clocks
+```
+
+4. Optional: Increase the size of the available swap size
+
+Follow the instructions at [this repository](https://github.com/JetsonHacksNano/resizeSwapMemory).
 
 ### Docker Execution Prerequisites
 
@@ -100,7 +113,8 @@ python setup.py install
 
 #### **pyrealsense2 (librealsense)**
 
-The pip version of the library is not available for devices with arm architecutre. So we need to install the library from the repository.
+The pip version of the library is not available for devices with arm architecutre.  
+So we need to install the library from the repository.
 
 https://github.com/IntelRealSense/librealsense/blob/master/doc/installation.md
 ```
@@ -118,7 +132,7 @@ python3 -c "import pyrealsense2"
 ```
 
 It can occur that the module cannot be found.
-The installation command `make install` fails to copy needed files/scripts to the correct python 3.6 library folder. 
+The installation command `make install` fails to copy needed files/scripts to the correct python 3.x library folder. 
 The location for the **pyrealsense2** folder can vary for each device / operating system.
 
 In general two additional steps need to be done:
@@ -129,13 +143,23 @@ For example the steps on the Jetson Nano look like this:
 
 ```
 mv /usr/local/lib/python3.6/pyrealsense2 /usr/local/lib/python3.6/dist-packages
-mv /librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
+mv ./librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib/python3.6/dist-packages/pyrealsense2
 ```
 
 ## Pre-trained models <a name="pre-trained-models"></a>
 
-Pre-trained model is available at pretrained-models/
-- ResNet 50 von P2
+Pre-trained model is available at `resources/pretrained-models/`.  
+To unzip it execute:
+```
+7z x resnet50.224.pth.7z
+```
+
+We also serve a converted trt-model at `resources/trt-models/`  
+To unzip it execute:
+```
+7z x resnet50.224.trt.pth.7z.001
+```
+**This model is converted with PyTorch 1.6 and may not work with other versions!**
 
 ## Running
 
@@ -143,7 +167,7 @@ Before running the scirpts directly on the nano (without docker) you need to suc
 
 To run the demo, pass path to the pre-trained checkpoint and camera id (or path to video file):
 ```
-python3 pipeline.py ../models/resnet50.224.trt.pth
+python3 pipeline.py ../resources/trt-models/resnet50.224.trt.pth
 ```
 > Additional comment about the demo.
 
@@ -154,29 +178,54 @@ python3 pipeline.py ../models/resnet50.224.trt.pth
 
 Before building and running the container you need to successfully accomplished the [docker prerequisites](#docker-execution-prerequisites).
 
+The image executes the pipeline.
 
-4. 
+1. Build the docker image
 
-- Mehrere Möglichkeiten:
-  - Docker Image selber bauen (ca. 40min bis 1h)
-    - Wenn selber gebaut, Name im docker-compose.yml
-  - Gebautes Docker Image aus der Registry herunterladen
-    - docker-compose pull bzw. docker pull wenzeldock/asl-face-recoginiton
-- Docker-compose ausführen  
-  - mehrere möglichkeiten:
-    - selber im container das skript ausführen
-    - das skript direkt bei start des containers ausführen
-- Konvertierung des Models
-  - Falls nicht das Model im Folder models verwendet werden soll
-  - oder eine neue Pytorch Version verwendet wird als 1.6 und diese inkompatibel mit der bisherigen Version ist
-  - muss diese gebaut werden und im models ordner platziert werden
-  - das docker-compose.yml erstellt eine volume, sodass man auf die models ordner im container zugreifen kann
+```
+sudo docker build . -t wenzeldock/asl-p6-pyrealsense2:3.2.0
+```
 
-HOW TO
+You can also run the bash script:
+```
+./docker_build.sh
+```
 
-- HOW TO was? 
-  - Befehle zum Ausführen des Docker Containers?
-  - Installieren der Dependencies für die Applikation?
+This step can take up between 1h to 1h 30min.
+
+2. Execute the Image
+
+We need a lot of parameters to execute the image.  
+The reason is the forwarding of the display, the camera access and the volume.
+
+To start the image:
+```
+sudo docker-compose up --build
+```
+
+### Optional steps (for development):
+
+- Comment the model conversion from the docker image:
+After the inital conversion we store the converted image at the volume folder.
+For future docker builds you can use the previous converted model and safe build time.
+
+- Use the bash shell inside the container:
+Sometimes it is useful to use the bash shell to test new implementations or tweak parameters.
+Change the last line: 
+
+```
+CMD ...
+```
+for following line: 
+```
+ENTRYPOINT /bin/bash
+```
+
+To enter the bash shell:
+```
+sudo docker-compose run asl-p6
+```
+
 
 ## Acknowledgments
 

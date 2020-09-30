@@ -116,6 +116,7 @@ class Pipeline():
         color_frame = current_iteration_item.color_frame
         _cv2 = current_iteration_item._cv2
 
+        # for each face and face expression generate the output
         for (top, right, bottom, left), face_expression in itertools.zip_longest(self.face_locations, self.face_expressions, fillvalue=''):
             self.logger.debug((top, right, bottom, left))
             self.logger.debug(face_expression)
