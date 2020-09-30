@@ -64,7 +64,7 @@ cd IW276WS20-P6
 ### Docker Execution Prerequisites
 
 #### Source List and GPG Files in `resource` folder
-We need to files to install some libraries with apt inside the build process for the image
+We need these two files to install some libraries (e.g. opencv2) using apt inside the build process for the image:
 ```
 /etc/apt/sources.list.d/nvidia-l4t-apt-source.list
 /etc/apt/trusted.gpg.d/jetson-ota-public.asc
