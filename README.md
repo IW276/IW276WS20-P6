@@ -140,7 +140,7 @@ Before running the scirpts directly on the nano (without docker) you need to suc
 
 To run the demo, pass path to the pre-trained checkpoint and camera id (or path to video file):
 ```
-python3 pipeline.py models/resnet50.224.trt.pth
+python3 pipeline.py ../models/resnet50.224.trt.pth
 ```
 > Additional comment about the demo.
 
