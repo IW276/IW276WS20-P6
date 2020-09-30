@@ -60,7 +60,7 @@ RUN mv /lib/librealsense/wrappers/python/pyrealsense2/__init__.py /usr/local/lib
 RUN mkdir app/ && cd app && mkdir IW276WS20-P6/
 WORKDIR /app/IW276WS20-P6
 COPY ./src/ ./src/
-COPY ./pretrained-models ./pretrained-models 
+COPY ./resources/pretrained-models ./resources/pretrained-models 
 RUN mkdir logs && mkdir models
 
 # unzip model
@@ -69,11 +69,11 @@ RUN 7z x resnet50.224.pth.7z
 
 WORKDIR /app/IW276WS20-P6/src/conversion
 
-# convert2trt script always quits with an segmentation fault
+# convert2trt script always quits with an segmentation fault -> exit 0 at the end to prevent the stop of the build process
 # be carefull with the log output to spot errors beside the segmentation fault
-RUN python3 convert2trt.py resnet50 ../../pretrained-models/resnet50.224.pth ../../models/resnet50.224.trt.pth; exit 0
+RUN python3 convert2trt.py resnet50 ../../resources/pretrained-models/resnet50.224.pth ../../resources/trt-models/resnet50.224.trt.pth; exit 0 
 
 WORKDIR /app/IW276WS20-P6/src
 
 # run the pipeline
-CMD python3 pipeline.py ../models/resnet50.224.trt.pth
+CMD python3 pipeline.py ../resources/trt-models/resnet50.224.trt.pth
