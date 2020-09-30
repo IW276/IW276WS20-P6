@@ -163,7 +163,7 @@ To unzip it execute:
 
 ## Running
 
-Before running the scirpts directly on the nano (without docker) you need to successfully accomplished the [nano prerequisites](#nano-execution-prerequisites).
+Before running the scirpts directly on the nano (without docker) you need to successfully accomplishe the [nano prerequisites](#nano-execution-prerequisites).
 
 To run the demo, pass path to the pre-trained checkpoint and camera id (or path to video file):
 ```
@@ -176,7 +176,7 @@ python3 pipeline.py ../resources/trt-models/resnet50.224.trt.pth
 
 ## Docker
 
-Before building and running the container you need to successfully accomplished the [docker prerequisites](#docker-execution-prerequisites).
+Before building and running the container you need to successfully accomplishe the [docker prerequisites](#docker-execution-prerequisites).
 
 The image executes the pipeline.
 
