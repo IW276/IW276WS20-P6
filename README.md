@@ -203,13 +203,15 @@ To start the image:
 sudo docker-compose up --build
 ```
 
-### Optional steps (for development):
+### Optional steps (for development)
 
-- Comment the model conversion from the docker image:
+- Comment the model conversion from the docker image  
+
 After the inital conversion we store the converted image at the volume folder.
 For future docker builds you can use the previous converted model and safe build time.
 
-- Use the bash shell inside the container:
+- Use the bash shell inside the container  
+
 Sometimes it is useful to use the bash shell to test new implementations or tweak parameters.
 Change the last line: 
 
