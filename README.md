@@ -43,10 +43,9 @@ Short introduction to project assigment.
 
 ## Prerequisites
 
-Ensure that the camera is connected to the Jetson Nano. 
-To check if the camera is connected correctly, you can run `rs-depth` or `rs-enumerate`. These commands are avaiable, **after** the installation of the pyrealsense2 library.
-
-### Docker Execution Prerequisites
+Ensure that the camera is connected to the Jetson Nano.  
+To check if the camera is connected correctly, you can run `rs-depth` or `rs-enumerate`.   
+These commands are avaiable, **after** the installation of the pyrealsense2 library.
 
 1. Clone the repository (https **or** ssh)
 ```
@@ -56,21 +55,25 @@ git clone https://github.com/IW276/IW276WS20-P6.git
 // ssh
 git clone git@github.com:IW276/IW276WS20-P6.git
 ```
+
 2. Move inside the directory
 ```
 cd IW276WS20-P6
 ```
 
-3. Copy Source List and GPG Files
+### Docker Execution Prerequisites
 
+#### Source List and GPG Files in `resource` folder
+We need to files to install some libraries with apt inside the build process for the image
 ```
-cp /etc/apt/sources.list.d/nvidia-l4t-apt-source.list .
-cp /etc/apt/trusted.gpg.d/jetson-ota-public.asc .
+/etc/apt/sources.list.d/nvidia-l4t-apt-source.list
+/etc/apt/trusted.gpg.d/jetson-ota-public.asc
 ```
-These files are needed to install OpenCV via apt-get inside the docker container.  
+These are currently located at the `resource` folder.  
+If there is a newer version of Jetpack installed, you might to manually place these files inside the folder again.  
 [Read the comment for more information](https://github.com/dusty-nv/jetson-containers/issues/5#issuecomment-632829664)
 
-To build and run the docker container follow [here](#docker)
+To build and run the docker container proceed [here](#docker).
 
 ### Nano Execution Prerequisites
 
@@ -136,11 +139,11 @@ Pre-trained model is available at pretrained-models/
 
 ## Running
 
-Before running the scirpts directly on the nano (without docker) you need to successfully done the [nano prerequisites](#nano-execution-prerequisites).
+Before running the scirpts directly on the nano (without docker) you need to successfully accomplished the [nano prerequisites](#nano-execution-prerequisites).
 
 To run the demo, pass path to the pre-trained checkpoint and camera id (or path to video file):
 ```
-python3 pipeline.py models/resnet50.224.trt.pth
+python3 pipeline.py ../models/resnet50.224.trt.pth
 ```
 > Additional comment about the demo.
 
@@ -149,7 +152,7 @@ python3 pipeline.py models/resnet50.224.trt.pth
 
 ## Docker
 
-Before building and running the container you need to successfully done the [docker prerequisites](#docker-execution-prerequisites).
+Before building and running the container you need to successfully accomplished the [docker prerequisites](#docker-execution-prerequisites).
 
 
 4. 
