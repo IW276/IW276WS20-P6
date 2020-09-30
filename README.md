@@ -191,7 +191,7 @@ You can also run the bash script:
 ./docker_build.sh
 ```
 
-This step can take up between 1h to 1h 30min.
+This step can take between 1h to 1h 30min.
 
 2. Execute the Image
 
