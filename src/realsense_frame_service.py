@@ -77,7 +77,7 @@ class RealsenseFrameService:
         depth_image = np.asanyarray(depth_frame.get_data())
         color_image = np.asanyarray(color_frame.get_data())
         toc = time.time()
-        self.logger.debug(f"Overall time for array creation: {toc - tic:0.4f} seconds")+
+        self.logger.debug(f"Overall time for array creation: {toc - tic:0.4f} seconds")
 
         return depth_frame, color_frame
 

@@ -61,10 +61,10 @@ RUN mkdir app/ && cd app && mkdir IW276WS20-P6/
 WORKDIR /app/IW276WS20-P6
 COPY ./src/ ./src/
 COPY ./resources/pretrained-models ./resources/pretrained-models 
-RUN mkdir logs && mkdir models
+RUN mkdir logs && cd resources && mkdir trt-models
 
 # unzip model
-WORKDIR /app/IW276WS20-P6/pretrained-models
+WORKDIR /app/IW276WS20-P6/resources/pretrained-models
 RUN 7z x resnet50.224.pth.7z
 
 WORKDIR /app/IW276WS20-P6/src/conversion
@@ -76,4 +76,5 @@ RUN python3 convert2trt.py resnet50 ../../resources/pretrained-models/resnet50.2
 WORKDIR /app/IW276WS20-P6/src
 
 # run the pipeline
-CMD python3 pipeline.py ../resources/trt-models/resnet50.224.trt.pth
+ENTRYPOINT /bin/bash
+# CMD python3 pipeline.py ../resources/trt-models/resnet50.224.trt.pth

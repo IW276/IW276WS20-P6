@@ -5,8 +5,8 @@
 version: "3.3"
 services: 
     asl-p6:
-        image: asl # wenzeldock/asl-p6-pyrealsense2:2.0.0
-        container_name: asl-p6
+        image: asl-test-build # wenzeldock/asl-p6-pyrealsense2:2.0.0
+        container_name: asl
         privileged: true
         network_mode: "host"
         environment:
@@ -14,7 +14,7 @@ services:
         volumes:
             - "/home/p6/.Xauthority:/root/.Xauthority"
             - "/tmp/.X11-unix:/tmp/.X11-unix"
-            - "./resources:/app/IW276WS20-P6/resources"
+              #   - "./resources:/app/IW276WS20-P6/resources"
         devices: 
             - "/dev/video0:/dev/video0"
             - "/dev/video1:/dev/video1"

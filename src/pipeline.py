@@ -12,6 +12,7 @@ from realsense_frame_service import RealsenseFrameService
 from text_export import TextExport
 from current_iteration_item import CurrentIterationItem
 import logging
+import sys
 
 class Pipeline():
 
