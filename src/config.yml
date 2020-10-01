@@ -1,0 +1,5 @@
+fps_constant: 10
+process_nth_frame: 6
+scale_factor: 3
+use_target_size: true
+target_width: 640

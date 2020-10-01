@@ -1,7 +1,0 @@
-{
-    "fpsConstant": 10,
-    "processNthFrame": 6,
-    "scaleFactor": 3,
-    "useTargetSize": true,
-    "targetWidth": 640
-}
