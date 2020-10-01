@@ -248,8 +248,9 @@ sudo docker-compose up
 
 - Comment the model conversion from the docker image  
 
-After the inital conversion we store the converted image at the volume folder.
-For future docker builds you can use the previous converted model and safe build time.
+After the inital conversion we store the converted image at the `trt-models` folder.  
+Enable the volumne in the `docker-compose.yml` file and place the converted model in it. 
+For future docker builds you can use the previous converted model and safe time building the image.
 
 - Use the bash shell inside the container  
 
@@ -272,13 +273,9 @@ sudo docker-compose run asl-p6
 ## Acknowledgments
 
 This repo is based on
-  - [Source 1](https://github.com/)
-  - [Source 2](https://github.com/)
-
-- P2 erwähnen 
-- librealsense beispiel für alignement und segmentation
-- multithreading mit queue 
-- erklärungen um den docker container auf der nano korrekt bauen zu können
+  - [Group P2](python3 pipeline.py ../resources/trt-models/resnet50.224.trt.pth)
+  - [librealsense example](https://github.com/IntelRealSense/librealsense/blob/master/wrappers/python/examples/align-depth2color.py)
+  - [Docker Image for Nano](https://github.com/IntelRealSense/librealsense/issues/5275#issuecomment-555830996)
 
 Thanks to the original authors for their work!
 
