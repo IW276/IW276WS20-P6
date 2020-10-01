@@ -27,7 +27,7 @@ class TRTModel:
 
     def __init__(self, size=224):
         self.model_trt = TRTModule()
-        PATH = './models/resnet50.224.trt.pth'
+        PATH = '../resources/trt-models/resnet50.224.trt.pth'
         self.model_trt.load_state_dict(torch.load(PATH))
         self.model_trt.eval().cuda()
 
