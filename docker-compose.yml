@@ -1,0 +1,22 @@
+# sudo docker run --rm -it --device /dev/video0 --device /dev/video1 
+# --device /dev/video2 --privileged --env DISPLAY=$DISPLAY -v /home/p6/.Xauthority:/root/.Xauthority -v /tmp/.X11-unix:/tmp/.X11-unix 
+# --net=host --entrypoint bash wenzeldock/asl-p6-pyrealsense2:2.0.0
+
+version: "3.3"
+services: 
+    asl-p6:
+        image: asl-test-build # wenzeldock/asl-p6-pyrealsense2:2.0.0
+        container_name: asl
+        privileged: true
+        network_mode: "host"
+        environment:
+            - DISPLAY=$DISPLAY
+        volumes:
+            - "/home/p6/.Xauthority:/root/.Xauthority"
+            - "/tmp/.X11-unix:/tmp/.X11-unix"
+              #   - "./resources:/app/IW276WS20-P6/resources"
+        devices: 
+            - "/dev/video0:/dev/video0"
+            - "/dev/video1:/dev/video1"
+            - "/dev/video2:/dev/video2"
+        stdin_open: true

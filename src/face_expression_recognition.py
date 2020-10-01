@@ -11,8 +11,6 @@ import cv2
 from torch2trt import torch2trt
 from torch2trt import TRTModule
 
-
-
 class TRTModel:
 
     dictionary = {
@@ -26,32 +24,34 @@ class TRTModel:
         "Neutral": 0,
     }
 
-    def __init__(self, size=224):
-        self.model = models.resnet50()
-        model_path = '../models/resnet50.224.pth'
-        self.model.load_state_dict(torch.load(model_path))
-        self.model.eval().cuda()
+    def __init__(self, trt_model):
+        self.model_trt = TRTModule()
+        self.model_trt.load_state_dict(torch.load(trt_model))
+        self.model_trt.eval().cuda()
 
         self.label_map = dict((v, k) for k, v in self.dictionary.items())
-        self.size = size
+        self.size = 224
 
-    def image_loader(self, image):
+    def __image_loader(self, image):
         loader = transforms.Compose([transforms.ToTensor()])
         image = loader(image).float()
         image = image.unsqueeze(0)
         return image
 
-    def resize_image(self, image):
+    def __resize_image(self, image):
         image = cv2.resize(image, (self.size, self.size))
         return image
 
     def face_expression(self, image):
-        resized_image = self.resize_image(image)
-        tensor_image = self.image_loader(resized_image)
+        resized_image = self.__resize_image(image)
+        tensor_image = self.__image_loader(resized_image)
         tensor_image = tensor_image.cuda().contiguous()
         with torch.no_grad():
-            outputs = self.model(tensor_image)
+            outputs = self.model_trt(tensor_image)
+            print(outputs)
             _, predicted = torch.max(outputs, 1)
+            print(predicted)
             idx = predicted.item()
+            print(idx)
             face_expression = self.label_map[idx]
             return face_expression
