@@ -273,7 +273,7 @@ sudo docker-compose run asl-p6
 ## Acknowledgments
 
 This repo is based on
-  - [Group P2](python3 pipeline.py ../resources/trt-models/resnet50.224.trt.pth)
+  - [Group P2](https://github.com/IW276/IW276SS20-P2)
   - [librealsense example](https://github.com/IntelRealSense/librealsense/blob/master/wrappers/python/examples/align-depth2color.py)
   - [Docker Image for Nano](https://github.com/IntelRealSense/librealsense/issues/5275#issuecomment-555830996)
 
