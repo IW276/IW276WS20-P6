@@ -51,11 +51,11 @@ class RealsenseFrameService:
             return color_frame, depth_frame, segmented_frame
 
     
-    def __segment_color_frame(self, depth_image, color_image):
+    def __segment_color_frame(self, depth_image_3d, color_image):
 
         # Remove background - Set pixels further than clipping_distance to grey
         tic = time.time()
-        segmented_image = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), self.grey_color, color_image)
+        segmented_frame = np.where((depth_image_3d > self.clipping_distance) | (depth_image_3d <= 0), self.grey_color, color_image)
         toc = time.time()
         self.logger.debug(f"Time for filtering: {toc - tic:0.4f} seconds")
 
@@ -71,11 +71,11 @@ class RealsenseFrameService:
 
         return depth_frame, color_frame
 
-    def __frames_to_arrays(self, depth_image, color_frame):
+    def __frames_to_arrays(self, depth_frame, color_frame):
 
         tic = time.time()
-        depth_image = np.asanyarray(depth_frame.get_data())
-        color_image = np.asanyarray(color_frame.get_data())
+        depth_frame = np.asanyarray(depth_frame.get_data())
+        color_frame = np.asanyarray(color_frame.get_data())
         toc = time.time()
         self.logger.debug(f"Overall time for array creation: {toc - tic:0.4f} seconds")
 
@@ -88,7 +88,7 @@ class RealsenseFrameService:
         toc = time.time()
         self.logger.debug(f"Time for aligning frames: {toc - tic:0.4f} seconds")
 
-        (depth_frame, depth_frame) = self.__get_depth_color_from_frames(aligned_frames)
+        (depth_frame, color_frame) = self.__get_depth_color_from_frames(aligned_frames)
 
         if not depth_frame or not color_frame:
             return

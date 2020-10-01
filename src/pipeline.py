@@ -58,7 +58,7 @@ class Pipeline():
     def __get_next_frame(self, current_iteration_item):
 
         tic = time.time() 
-        color_frame, depth_frame, segmented_frame = self.realsense_frame_service.fetch_images(current_iteration_item.process_next_frame)
+        color_frame, depth_frame, segmented_frame = self.realsense_frame_service.fetch_frames(current_iteration_item.process_next_frame)
         toc = time.time()
         self.logger.debug(f"Overall time for segmentation: {toc - tic:0.4f} seconds")
         
