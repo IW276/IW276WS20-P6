@@ -17,6 +17,7 @@ Short introduction to project assigment.
   - [Table of Contents](#table-of-contents)
   - [Requirements](#requirements)
   - [Prerequisites](#prerequisites)
+    - [Display Forwarding](#display-forwarding)
     - [Docker Execution Prerequisites](#docker-execution-prerequisites)
       - [Source List and GPG Files in `resource` folder](#source-list-and-gpg-files-in-resource-folder)
     - [Nano Execution Prerequisites](#nano-execution-prerequisites)
@@ -24,8 +25,10 @@ Short introduction to project assigment.
       - [**pyrealsense2 (librealsense)**](#pyrealsense2-librealsense)
   - [Pre-trained models <a name="pre-trained-models"></a>](#pre-trained-models-)
   - [Running](#running)
+    - [Model Conversion](#model-conversion)
+    - [Execute Pipeline](#execute-pipeline)
   - [Docker](#docker)
-    - [Optional steps (for development):](#optional-steps-for-development)
+    - [Optional steps (for development)](#optional-steps-for-development)
   - [Acknowledgments](#acknowledgments)
   - [Contact](#contact)
 
@@ -73,6 +76,20 @@ sudo jetson_clocks
 4. Optional: Increase the size of the available swap size
 
 Follow the instructions at [this repository](https://github.com/JetsonHacksNano/resizeSwapMemory).
+
+### Display Forwarding
+
+To see the generated video output stream, you need to serve a display to the nano.  
+On option is to directly work on the nano with a display attached.  
+Sometimes this is not possible. The other option is to work with ssh.  
+When working with ssh you need some kind of display forwarding (X11 as a keyword).  
+We all worked on Windows, therefore these two software products **together** made it work:
+
+- https://www.putty.org/
+  - Serves as ssh console with forwarding option
+- https://sourceforge.net/projects/xming/ 
+  - XLaunch Server enables display availability with windows  
+
 
 ### Docker Execution Prerequisites
 
@@ -162,17 +179,41 @@ To unzip it execute:
 **This model is converted with PyTorch 1.6 and may not work with other versions!**
 
 ## Running
-
 Before running the scirpts directly on the nano (without docker) you need to successfully accomplishe the [nano prerequisites](#nano-execution-prerequisites).
+
+### Model Conversion
+
+To optimize the performance of the face expression recognition, we use a TenorRT model for the pipeline.
+To convert the model yourself, you need to follow these steps:
+
+1. Move into the conversion directory
+```
+cd IW276WS20-P6/src/conversion
+```
+
+2. Convert the unzipped PyTorch model
+```
+python3 convert2trt.py resnet50 ../../resources/pretrained-models/resnet50.224.pth ../../resources/pretrained-models/resnet50.224.trt.pth
+```
+
+The argument list explained:
+```
+python3 convert2trt.py <mode> <source> <target>
+```
+
+| Argument             | Description                                                        |
+|----------------------|--------------------------------------------------------------------|
+| `<mode>`             | switch between network modes (resnet50 or resnet18)                |
+| `<source>`           | path to pytorch model                                              |
+| `<target`            | path to resulting tensorRT model                                   |
+
+
+### Execute Pipeline
 
 To run the demo, pass path to the pre-trained checkpoint and camera id (or path to video file):
 ```
 python3 pipeline.py ../resources/trt-models/resnet50.224.trt.pth
 ```
-> Additional comment about the demo.
-
-- Laufen lassen der Applikation direkt über den Container bei CMD/Entrypoint
-- oder über die bash shell im Container über
 
 ## Docker
 
@@ -183,7 +224,7 @@ The image executes the pipeline.
 1. Build the docker image
 
 ```
-sudo docker build . -t wenzeldock/asl-p6-pyrealsense2:3.2.0
+sudo docker build . -t asl-p6-pyrealsense2
 ```
 
 You can also run the bash script:
@@ -200,7 +241,7 @@ The reason is the forwarding of the display, the camera access and the volume.
 
 To start the image:
 ```
-sudo docker-compose up --build
+sudo docker-compose up
 ```
 
 ### Optional steps (for development)
@@ -227,7 +268,6 @@ To enter the bash shell:
 ```
 sudo docker-compose run asl-p6
 ```
-
 
 ## Acknowledgments
 
