@@ -1,1 +1,1 @@
-sudo docker build . -t wenzeldock/asl-p6
+sudo docker build . -t asl-p6
