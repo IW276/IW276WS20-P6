@@ -5,8 +5,8 @@
 version: "3.3"
 services: 
     asl-p6:
-        image: asl-test-build # wenzeldock/asl-p6-pyrealsense2:2.0.0
-        container_name: asl
+        image: asl-p6 # wenzeldock/asl-p6-pyrealsense2:2.0.0
+        container_name: asl-p6
         privileged: true
         network_mode: "host"
         environment:
