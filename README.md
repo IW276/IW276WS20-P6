@@ -224,7 +224,7 @@ The image executes the pipeline.
 1. Build the docker image
 
 ```
-sudo docker build . -t asl-p6-pyrealsense2
+sudo docker build . -t asl-p6
 ```
 
 You can also run the bash script:
