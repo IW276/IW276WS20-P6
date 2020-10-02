@@ -14,6 +14,7 @@ services:
         volumes:
             - "/home/p6/.Xauthority:/root/.Xauthority"
             - "/tmp/.X11-unix:/tmp/.X11-unix"
+            - "./logs:/app/IW276WS20-P6/logs"
               #   - "./resources:/app/IW276WS20-P6/resources"
         devices: 
             - "/dev/video0:/dev/video0"
