@@ -1,4 +1,4 @@
-# Project-Template for IW276 Autonome Systeme Labor
+# RGBD Face Expression Recognition
 
 <a href="https://iwi-i-wiki.hs-karlsruhe.de/IWI_I/AutonomeSysteme/IW276WS20P6FaceExpressionRecognition"><img src="https://img.shields.io/badge/-Documentation-brightgreen"/></a>
 <a href="https://hub.docker.com/repository/docker/wenzeldock/asl-p6-pyrealsense2"><img src="https://img.shields.io/badge/-Docker Hub-blue"/></a>
