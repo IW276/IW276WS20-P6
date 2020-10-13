@@ -13,7 +13,7 @@ Short introduction to project assigment.
 
 ## Table of Contents
 
-- [Project-Template for IW276 Autonome Systeme Labor](#project-template-for-iw276-autonome-systeme-labor)
+- [RGBD Face Expression Recognition](#rgbd-face-expression-recognition)
   - [Table of Contents](#table-of-contents)
   - [Requirements](#requirements)
   - [Prerequisites](#prerequisites)
