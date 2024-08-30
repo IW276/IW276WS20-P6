@@ -1,5 +1,5 @@
 numpy==1.19.1
-opencv-python==4.4.0.42
+opencv-python==4.8.1.78
 pyrealsense2==2.38.1.2225
 torch==1.6.0
 torchvision==0.7
